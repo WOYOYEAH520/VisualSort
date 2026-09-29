@@ -243,12 +243,25 @@ namespace NVisualSort {
 		}
 
 		static void DrawStrips(const std::vector<Strip>& strips_) {
-			GetDrawingTool().ClearRectangle(0, Strip::StripMaxTop(), GetConfigManager().GetWidth(), GetConfigManager().GetHeight());
-			for (size_t stripIndex = 0; stripIndex < strips_.size(); ++stripIndex) {
-				Strip::s_drawFunc(RECT(strips_[stripIndex].m_left, strips_[stripIndex].m_top, strips_[stripIndex].m_right,
-					GetConfigManager().GetHeight()), strips_[stripIndex].m_color);
+			const int width = GetConfigManager().GetWidth();
+			const int height = GetConfigManager().GetHeight();
+			const int top = Strip::StripMaxTop();
+			std::vector<const Strip*> lastVisitor(width, nullptr);
+			for (const auto& strip : strips_) {
+				const int l = (std::max)(0, strip.m_left);
+				const int r = (std::min)(width - 1, strip.m_right);
+				for (int col = l; col <= r; ++col) {
+					lastVisitor[col] = &strip;
+				}
 			}
-			GetDrawingTool().FlushBatchDraw(0, Strip::StripMaxTop(), GetConfigManager().GetWidth(), GetConfigManager().GetHeight());
+			GetDrawingTool().ClearRectangle(0, top, width, height);
+			for (int col = 0; col < width; ++col) {
+				if (lastVisitor[col] != nullptr) {
+					const Strip& s = *lastVisitor[col];
+					Strip::s_drawFunc(RECT(col, s.m_top, col, height), s.m_color);
+				}
+			}
+			GetDrawingTool().FlushBatchDraw(0, top, width, height);
 		}
 		
 		static void DrawStrip1(const Strip& strip_, COLORREF color_) {
