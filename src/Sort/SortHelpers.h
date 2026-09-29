@@ -43,41 +43,16 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
         return 0;
     }
 
-    // Map ArrayV highlight marks (1..4) to EasyX colors. Strip phase only.
-    // ArrayV keeps ONE moving cursor per mark type (clearMark restores the old
-    // position), so a mark that moves to a new strip restores its previous
-    // strip to the auto gradient first; otherwise marks would pile up on every
-    // strip a scan ever touched. Writes reset colors anyway (Strip::operator=
-    // calls SetTopAndColorAuto), so only the cursor bookkeeping is needed here.
-    inline constexpr COLORREF MarkArrayColor(int mark) noexcept {
-        switch (mark) {
-        case 1: return GREEN;
-        case 2: return YELLOW;
-        case 3: return LIGHTMAGENTA;
-        case 4: return LIGHTCYAN;
-        default: return RGB(0, 0, 0);
-        }
-    }
+    // ArrayV highlight marks (1..4) are intentionally removed: the ported
+    // algorithms paint nothing. The user's own sorts in Sort.h do their own
+    // SetColor highlighting directly, so this must stay a no-op for them to
+    // remain the only colored highlights. Kept as a stub so the ArrayV mark
+    // call sites stay readable.
     template<class T>
     void MarkArray(int mark, std::vector<T>& data_, ptrdiff_t i) {
-        if constexpr (std::is_same_v<T, Strip>) {
-            static std::array<std::atomic<ptrdiff_t>, 5> s_markPos{ -1, -1, -1, -1, -1 };
-            if (mark < 1 || mark > 4) return;
-            ptrdiff_t n = static_cast<ptrdiff_t>(data_.size());
-            if (i < 0 || i >= n) return;
-            ptrdiff_t prev = s_markPos[static_cast<size_t>(mark)].exchange(i);
-            if (prev != i && prev >= 0 && prev < n) {
-                data_[prev].SetColorAuto();
-                // Other marks may still sit on the old strip (single-color model):
-                // re-apply them so the strip keeps the newest remaining highlight.
-                for (int m = 1; m <= 4; ++m) {
-                    if (m != mark && s_markPos[static_cast<size_t>(m)].load() == prev) {
-                        data_[prev].SetColor(MarkArrayColor(m));
-                    }
-                }
-            }
-            data_[i].SetColor(MarkArrayColor(mark));
-        }
+        (void)mark;
+        (void)data_;
+        (void)i;
     }
 
     // Reverse data_[start .. end).
