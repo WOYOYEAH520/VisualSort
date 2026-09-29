@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -77,6 +77,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)src\Common;$(ProjectDir)src\Graphics;$(ProjectDir)src\UI;$(ProjectDir)src\Sort;$(ProjectDir)src\App</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -95,6 +96,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)src\Common;$(ProjectDir)src\Graphics;$(ProjectDir)src\UI;$(ProjectDir)src\Sort;$(ProjectDir)src\App</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -141,24 +143,24 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Button.h" />
-    <ClInclude Include="ConfigManager.h" />
-    <ClInclude Include="Coordinate.h" />
-    <ClInclude Include="Counter.h" />
-    <ClInclude Include="Dialog.h" />
-    <ClInclude Include="DrawingTool.h" />
-    <ClInclude Include="Fraction.h" />
-    <ClInclude Include="InputBox.h" />
-    <ClInclude Include="MainMenu.h" />
-    <ClInclude Include="ScopeGuard.h" />
-    <ClInclude Include="Sketch.h" />
-    <ClInclude Include="Sort.h" />
-    <ClInclude Include="Strip.h" />
-    <ClInclude Include="VisualSort.h" />
-    <ClInclude Include="WideError.h" />
+    <ClInclude Include="src\UI\Button.h" />
+    <ClInclude Include="src\Graphics\ConfigManager.h" />
+    <ClInclude Include="src\Common\Coordinate.h" />
+    <ClInclude Include="src\Sort\Counter.h" />
+    <ClInclude Include="src\UI\Dialog.h" />
+    <ClInclude Include="src\Graphics\DrawingTool.h" />
+    <ClInclude Include="src\Common\Fraction.h" />
+    <ClInclude Include="src\UI\InputBox.h" />
+    <ClInclude Include="src\App\MainMenu.h" />
+    <ClInclude Include="src\Common\ScopeGuard.h" />
+    <ClInclude Include="src\UI\Sketch.h" />
+    <ClInclude Include="src\Sort\Sort.h" />
+    <ClInclude Include="src\Sort\Strip.h" />
+    <ClInclude Include="src\App\VisualSort.h" />
+    <ClInclude Include="src\Common\WideError.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
