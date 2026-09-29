@@ -332,7 +332,13 @@ namespace NVisualSort {
 			}
 			else {
 				return [](RECT rect_, COLORREF color_) {
-					GetDrawingTool().FillRectangle(rect_, 1, PS_SOLID, BLACK, color_);
+					// 1像素黑边框会把窄矩形整个盖住（DrawStrips按列画1像素宽），窄矩形改用无边框实心绘制
+					if (rect_.right - rect_.left >= 3) {
+						GetDrawingTool().FillRectangle(rect_, 1, PS_SOLID, BLACK, color_);
+					}
+					else {
+						GetDrawingTool().SolidRectangle(rect_, color_);
+					}
 				};
 			}
 		}
