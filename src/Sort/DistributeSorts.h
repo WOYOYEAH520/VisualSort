@@ -95,7 +95,6 @@ namespace NVisualSort::NSortAlgorithms {
             std::vector<ptrdiff_t> offset(static_cast<size_t>(numberOfBuckets), 0);
 
             for (ptrdiff_t i = start; i < end; ++i) {
-                NSortHelpers::MarkArray(1, data_, i);
                 ++count[getDigit(static_cast<int>(data_[i]), divisor)];
             }
 
@@ -215,7 +214,6 @@ namespace NVisualSort::NSortAlgorithms {
                     bogoBogo(tmp[static_cast<size_t>(idx)], len - 1);
                 }
                 for (ptrdiff_t i = 0; i < len; ++i) {
-                    NSortHelpers::MarkArray(1, array, i);
                     if (NSortHelpers::CompareValues(array[static_cast<size_t>(i)],
                                                     tmp[static_cast<size_t>(idx)][static_cast<size_t>(i)]) != 0) {
                         return false;
@@ -298,7 +296,6 @@ namespace NVisualSort::NSortAlgorithms {
         std::vector<ptrdiff_t> transpose(static_cast<size_t>(maxValue), 0);
 
         for (ptrdiff_t i = 0; i < length; ++i) {
-            NSortHelpers::MarkArray(2, data_, i);
             int num = static_cast<int>(data_[i]);
             for (int j = 0; j < num; ++j) {
                 ++transpose[static_cast<size_t>(j)];
@@ -306,7 +303,6 @@ namespace NVisualSort::NSortAlgorithms {
         }
 
         for (ptrdiff_t i = 0; i < length; ++i) {
-            NSortHelpers::MarkArray(2, data_, i);
             ptrdiff_t sum = 0;
             for (ptrdiff_t j = 0; j < maxValue; ++j) {
                 if (transpose[static_cast<size_t>(j)] > 0) {
@@ -335,12 +331,10 @@ namespace NVisualSort::NSortAlgorithms {
         ptrdiff_t max = length;
         while (min < max - 1) {
             if (NSortHelpers::isMinSorted(data_, min, max)) {
-                NSortHelpers::MarkArray(3, data_, min);
                 ++min;
                 continue;
             }
             if (NSortHelpers::isMaxSorted(data_, min, max)) {
-                NSortHelpers::MarkArray(4, data_, max - 1);
                 --max;
                 continue;
             }
@@ -382,7 +376,6 @@ namespace NVisualSort::NSortAlgorithms {
 
         for (ptrdiff_t i = 0; i < sortLength; ++i) {
             ++counts[static_cast<size_t>(static_cast<int>(data_[i]))];
-            NSortHelpers::MarkArray(1, data_, i);
         }
         for (ptrdiff_t i = 1; i < static_cast<ptrdiff_t>(counts.size()); ++i) {
             counts[static_cast<size_t>(i)] += counts[static_cast<size_t>(i - 1)];
@@ -452,7 +445,6 @@ namespace NVisualSort::NSortAlgorithms {
             int maxValue = minValue;
             ptrdiff_t maxIndex = 0;
             for (ptrdiff_t i = 1; i < sortLength - 1; i += 2) {
-                NSortHelpers::MarkArray(1, array, i);
                 int smallValue;
                 int big;
                 ptrdiff_t bigIndex;
@@ -475,7 +467,6 @@ namespace NVisualSort::NSortAlgorithms {
                 }
             }
             // do the last element
-            NSortHelpers::MarkArray(1, array, sortLength - 1);
             int lastValue = static_cast<int>(array[static_cast<size_t>(sortLength - 1)]);
             if (lastValue < minValue) {
                 minValue = lastValue;
@@ -495,7 +486,6 @@ namespace NVisualSort::NSortAlgorithms {
             double c = (static_cast<double>(m) - 1.0) / (maxValue - minValue);
             ptrdiff_t K;
             for (ptrdiff_t h = 0; h < sortLength; ++h) {
-                NSortHelpers::MarkArray(1, array, h);
                 K = static_cast<ptrdiff_t>(static_cast<double>(static_cast<int>(array[static_cast<size_t>(h)]) - minValue) * c) + 1;
                 ++L[static_cast<size_t>(K)];
             }
@@ -520,7 +510,6 @@ namespace NVisualSort::NSortAlgorithms {
                     ptrdiff_t location = L[static_cast<size_t>(K)] - 1;
                     int temp = static_cast<int>(array[static_cast<size_t>(location)]);
                     array[static_cast<size_t>(location)] = evicted;
-                    NSortHelpers::MarkArray(1, array, location);
                     evicted = temp;
                     --L[static_cast<size_t>(K)];
                     ++numMoves;
@@ -587,9 +576,7 @@ namespace NVisualSort::NSortAlgorithms {
         }
         // iterate for every integer value in the array range
         for (ptrdiff_t j = static_cast<ptrdiff_t>(y.size()) - 1; j >= 0; --j) {
-            NSortHelpers::MarkArray(2, data_, length - y[static_cast<size_t>(j)]);
             for (ptrdiff_t i = 0; i < length; ++i) {
-                NSortHelpers::MarkArray(1, data_, i);
                 int inc = (i >= length - y[static_cast<size_t>(j)] ? 1 : 0)
                         - (static_cast<int>(x[static_cast<size_t>(i)]) >= j ? 1 : 0);
                 data_[static_cast<size_t>(i)] = static_cast<int>(data_[static_cast<size_t>(i)]) + inc;
@@ -731,7 +718,6 @@ namespace NVisualSort::NSortAlgorithms {
                 ptrdiff_t digit = getDigit(static_cast<int>(data_[static_cast<size_t>(pos)]), p);
                 if (digit == 0) {
                     ++pos;
-                    NSortHelpers::MarkArray(0, data_, pos);
                 }
                 else {
                     multiSwap(pos, vregs[static_cast<size_t>(digit - 1)]);
@@ -762,7 +748,6 @@ namespace NVisualSort::NSortAlgorithms {
 
         using std::swap;
         for (ptrdiff_t i = 0; i < sortLength; ++i) {
-            NSortHelpers::MarkArray(3, data_, i);
             ptrdiff_t cmpCount = 0;
             ptrdiff_t target = static_cast<ptrdiff_t>(static_cast<int>(data_[static_cast<size_t>(i)]) - minValue);
             while (target != i && cmpCount < sortLength) {
@@ -828,7 +813,6 @@ namespace NVisualSort::NSortAlgorithms {
                 registers[i].clear();
             }
             for (ptrdiff_t i = 0; i < sortLength; ++i) {
-                NSortHelpers::MarkArray(1, data_, i);
                 int value = static_cast<int>(data_[i]);
                 registers[getDigit(value, p)].push_back(static_cast<ptrdiff_t>(value));
             }
@@ -857,7 +841,6 @@ namespace NVisualSort::NSortAlgorithms {
             while (!NSortHelpers::isMinSorted(data_, i, length)) {
                 NSortHelpers::bogoSwap(data_, i, length, engine);
             }
-            NSortHelpers::MarkArray(3, data_, i);
         }
     }
 
@@ -908,12 +891,9 @@ namespace NVisualSort::NSortAlgorithms {
             if (min >= max || pow < 0) {
                 return;
             }
-            NSortHelpers::MarkArray(2, data_, max - 1);
-            NSortHelpers::MarkArray(3, data_, min);
 
             std::vector<std::vector<ptrdiff_t>> registers(static_cast<size_t>(base));
             for (ptrdiff_t i = min; i < max; ++i) {
-                NSortHelpers::MarkArray(1, data_, i);
                 int value = static_cast<int>(data_[i]);
                 registers[getDigit(value, pow)].push_back(static_cast<ptrdiff_t>(value));
             }
@@ -1025,8 +1005,6 @@ namespace NVisualSort::NSortAlgorithms {
             // check if the array is stably sorted (doubles as duplicate-detection)
             bool sorted = true;
             for (ptrdiff_t i = 0; i < length - 1; ++i) {
-                NSortHelpers::MarkArray(1, data_, i);
-                NSortHelpers::MarkArray(2, data_, i + 1);
                 int comp = NSortHelpers::CompareValues(data_[static_cast<size_t>(loops[static_cast<size_t>(i)])],
                                                        data_[static_cast<size_t>(loops[static_cast<size_t>(i + 1)])]);
                 if (comp < 0 || (comp == 0 && loops[static_cast<size_t>(i)] < loops[static_cast<size_t>(i + 1)])) {
@@ -1089,7 +1067,6 @@ namespace NVisualSort::NSortAlgorithms {
         std::vector<ptrdiff_t> holes(static_cast<size_t>(size), 0);
         for (ptrdiff_t x = 0; x < sortLength; ++x) {
             ++holes[static_cast<size_t>(static_cast<int>(data_[static_cast<size_t>(x)]) - minValue)];
-            NSortHelpers::MarkArray(1, data_, x);
         }
 
         ptrdiff_t j = 0;
@@ -1097,7 +1074,6 @@ namespace NVisualSort::NSortAlgorithms {
             while (holes[static_cast<size_t>(count)] > 0) {
                 --holes[static_cast<size_t>(count)];
                 data_[static_cast<size_t>(j)] = static_cast<int>(count + minValue);
-                NSortHelpers::MarkArray(1, data_, j);
                 ++j;
             }
         }
@@ -1160,8 +1136,6 @@ namespace NVisualSort::NSortAlgorithms {
             // check if the array is stably sorted (doubles as duplicate-detection)
             bool sorted = true;
             for (ptrdiff_t i = 0; i < length - 1; ++i) {
-                NSortHelpers::MarkArray(1, data_, i);
-                NSortHelpers::MarkArray(2, data_, i + 1);
                 int comp = NSortHelpers::CompareValues(data_[static_cast<size_t>(loops[static_cast<size_t>(i)])],
                                                        data_[static_cast<size_t>(loops[static_cast<size_t>(i + 1)])]);
                 if (comp < 0 || (comp == 0 && loops[static_cast<size_t>(i)] < loops[static_cast<size_t>(i + 1)])) {
@@ -1430,7 +1404,6 @@ namespace NVisualSort::NSortAlgorithms {
                 }
                 i = b;
                 while (b < length && shift(static_cast<int>(data_[static_cast<size_t>(b)]), q + 1) == shift(m, q + 1)) {
-                    NSortHelpers::MarkArray(1, data_, b);
                     ++b;
                 }
             }
@@ -1457,7 +1430,6 @@ namespace NVisualSort::NSortAlgorithms {
                 ptrdiff_t j = NSortHelpers::bogoRandInt(engine, i, length);
                 swap(data_[i], data_[j]);
             }
-            NSortHelpers::MarkArray(3, data_, i);
         }
     }
 
@@ -1571,7 +1543,6 @@ namespace NVisualSort::NSortAlgorithms {
         int minValue = static_cast<int>(data_[0]);
         int maxValue = minValue;
         for (ptrdiff_t mainPointer = 1; mainPointer < length; ++mainPointer) {
-            NSortHelpers::MarkArray(1, data_, mainPointer);
             if (static_cast<int>(data_[mainPointer]) < minValue) {
                 minValue = static_cast<int>(data_[mainPointer]);
             }
@@ -1591,14 +1562,12 @@ namespace NVisualSort::NSortAlgorithms {
 
         auto transferFrom = [&](ptrdiff_t arrayLength, ptrdiff_t index) {
             for (ptrdiff_t pointer = 0; pointer < arrayLength && aux[static_cast<size_t>(pointer)] != 0; ++pointer) {
-                NSortHelpers::MarkArray(2, data_, index);
                 ++data_[static_cast<size_t>(index)];
                 --aux[static_cast<size_t>(pointer)];
             }
         };
         auto transferTo = [&](ptrdiff_t index) {
             for (ptrdiff_t pointer = 0; static_cast<int>(data_[static_cast<size_t>(index)]) > minValue; ++pointer) {
-                NSortHelpers::MarkArray(2, data_, index);
                 --data_[static_cast<size_t>(index)];
                 ++aux[static_cast<size_t>(pointer)];
             }
@@ -1652,8 +1621,6 @@ namespace NVisualSort::NSortAlgorithms {
             bool sorted = true;
             ptrdiff_t i = length - 2;
             for (; i >= 0; --i) {
-                NSortHelpers::MarkArray(1, data_, i);
-                NSortHelpers::MarkArray(2, data_, i + 1);
                 int comp = NSortHelpers::CompareValues(data_[static_cast<size_t>(loops[static_cast<size_t>(i)])],
                                                        data_[static_cast<size_t>(loops[static_cast<size_t>(i + 1)])]);
                 if (comp < 0 || (comp == 0 && loops[static_cast<size_t>(i)] < loops[static_cast<size_t>(i + 1)])) {
@@ -1746,7 +1713,6 @@ namespace NVisualSort::NSortAlgorithms {
             for (ptrdiff_t i = 0; i < r - 1; ++i) {
                 ptrdiff_t pos = a + offs[static_cast<size_t>(i)];
                 if (cnts[static_cast<size_t>(i)] > offs[static_cast<size_t>(i)]) {
-                    NSortHelpers::MarkArray(2, data_, pos);
                     int t = static_cast<int>(data_[static_cast<size_t>(pos)]);
                     do {
                         size_t digit = getDigit(t, qq);
@@ -1766,7 +1732,6 @@ namespace NVisualSort::NSortAlgorithms {
         };
 
         for (ptrdiff_t j = 0; j < length; ++j) {
-            NSortHelpers::MarkArray(1, data_, j);
             ++cnts[getDigit(static_cast<int>(data_[j]), q)];
         }
 
@@ -1784,7 +1749,6 @@ namespace NVisualSort::NSortAlgorithms {
                 }
                 i = b;
                 while (b < length && shift(static_cast<int>(data_[static_cast<size_t>(b)]), q + 1) == shift(m, q + 1)) {
-                    NSortHelpers::MarkArray(1, data_, b);
                     ++cnts[getDigit(static_cast<int>(data_[static_cast<size_t>(b)]), q)];
                     ++b;
                 }
@@ -1793,7 +1757,6 @@ namespace NVisualSort::NSortAlgorithms {
                 b = p;
                 --q;
                 for (ptrdiff_t j = i; j < b; ++j) {
-                    NSortHelpers::MarkArray(1, data_, j);
                     ++cnts[getDigit(static_cast<int>(data_[j]), q)];
                 }
             }
@@ -1826,11 +1789,9 @@ namespace NVisualSort::NSortAlgorithms {
             while (true) {
                 do {
                     ++i;
-                    NSortHelpers::MarkArray(1, data_, i);
                 } while (i < j && ((static_cast<int>(data_[static_cast<size_t>(i)]) >> bit) & 1) == 0);
                 do {
                     --j;
-                    NSortHelpers::MarkArray(2, data_, j);
                 } while (j > i && ((static_cast<int>(data_[static_cast<size_t>(j)]) >> bit) & 1) != 0);
                 if (i < j) {
                     swap(data_[static_cast<size_t>(i)], data_[static_cast<size_t>(j)]);
@@ -1854,7 +1815,6 @@ namespace NVisualSort::NSortAlgorithms {
                 }
                 i = b;
                 while (b < length && ((static_cast<int>(data_[static_cast<size_t>(b)]) >> (q + 1)) == (m >> (q + 1)))) {
-                    NSortHelpers::MarkArray(1, data_, b);
                     ++b;
                 }
             }
@@ -1894,7 +1854,6 @@ namespace NVisualSort::NSortAlgorithms {
         float bucketRate = static_cast<float>(auxLen) / static_cast<float>(maxValue - minValue + 1);
 
         for (ptrdiff_t i = 0; i < dataSize; ++i) {
-            NSortHelpers::MarkArray(1, data_, i);
             ptrdiff_t idx = static_cast<ptrdiff_t>(static_cast<float>(static_cast<int>(data_[i]) - minValue) * bucketRate);
             ++count[static_cast<size_t>(idx)];
         }

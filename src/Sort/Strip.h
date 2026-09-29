@@ -250,20 +250,13 @@ namespace NVisualSort {
 			const int width = GetConfigManager().GetWidth();
 			const int height = GetConfigManager().GetHeight();
 			const int top = Strip::StripMaxTop();
-			std::vector<const Strip*> lastVisitor(width, nullptr);
+			GetDrawingTool().ClearRectangle(0, top, width, height);
+			// 按整根条形绘制：带黑边框的绘制函数会把1像素宽的矩形整个盖住，
+			// 因此不能按列逐像素画（相邻条形共享边界列，依次覆盖即可，与旧逻辑等价）
 			for (const auto& strip : strips_) {
 				const int l = (std::max)(0, strip.m_left);
 				const int r = (std::min)(width - 1, strip.m_right);
-				for (int col = l; col <= r; ++col) {
-					lastVisitor[col] = &strip;
-				}
-			}
-			GetDrawingTool().ClearRectangle(0, top, width, height);
-			for (int col = 0; col < width; ++col) {
-				if (lastVisitor[col] != nullptr) {
-					const Strip& s = *lastVisitor[col];
-					Strip::s_drawFunc(RECT(col, s.m_top, col, height), s.m_color);
-				}
+				Strip::s_drawFunc(RECT(l, strip.m_top, r, height), strip.m_color);
 			}
 			GetDrawingTool().FlushBatchDraw(0, top, width, height);
 		}

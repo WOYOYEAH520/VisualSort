@@ -6,7 +6,7 @@
 // system code page (GBK); use \uXXXX escapes if a wide string is ever needed.
 //
 // Layout:
-//   shared utilities: CompareValues, MarkArray, reverseRange, SortRandomEngine
+//   shared utilities: CompareValues, reverseRange, SortRandomEngine
 //   SECTION 1: basic sorts & merge tools
 //   SECTION 2: block / bit / shatter / pdq / quad
 //   SECTION 3: grail / tim / wiki / kota
@@ -41,18 +41,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
         if (a < b) return -1;
         if (b < a) return 1;
         return 0;
-    }
-
-    // ArrayV highlight marks (1..4) are intentionally removed: the ported
-    // algorithms paint nothing. The user's own sorts in Sort.h do their own
-    // SetColor highlighting directly, so this must stay a no-op for them to
-    // remain the only colored highlights. Kept as a stub so the ArrayV mark
-    // call sites stay readable.
-    template<class T>
-    void MarkArray(int mark, std::vector<T>& data_, ptrdiff_t i) {
-        (void)mark;
-        (void)data_;
-        (void)i;
     }
 
     // Reverse data_[start .. end).
@@ -117,9 +105,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
 
             while (lo < hi) {
                 ptrdiff_t mid = lo + ((hi - lo) / 2); // avoid int overflow!
-                MarkArray(1, data_, lo);
-                MarkArray(2, data_, mid);
-                MarkArray(3, data_, hi);
 
                 if (num < data_[mid]) { // do NOT move equal elements to right of inserted element; this maintains stability!
                     hi = mid;
@@ -167,8 +152,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
             if (leaf < dist && CompareValues(data_[start + leaf - 1], data_[start + leaf]) == compareVal) {
                 ++leaf;
             }
-            MarkArray(1, data_, start + root - 1);
-            MarkArray(2, data_, start + leaf - 1);
             if (CompareValues(data_[start + root - 1], data_[start + leaf - 1]) == compareVal) {
                 using std::swap;
                 swap(data_[start + root - 1], data_[start + leaf - 1]);
@@ -235,17 +218,13 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                         T v = data_[i];
                         ptrdiff_t j = i;
 
-                        MarkArray(1, data_, j);
-                        MarkArray(2, data_, j - h);
 
                         while (j >= start + h && data_[j - h] > v) {
                             data_[j] = data_[j - h];
                             j -= h;
 
-                            MarkArray(1, data_, j);
 
                             if (j - h >= 0) {
-                                MarkArray(2, data_, j - h);
                             }
                         }
                         data_[j] = v;
@@ -258,17 +237,13 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                         T v = data_[i];
                         ptrdiff_t j = i;
 
-                        MarkArray(1, data_, j);
-                        MarkArray(2, data_, j - h);
 
                         while (j >= start + h && data_[j - h] > v) {
                             data_[j] = data_[j - h];
                             j -= h;
 
-                            MarkArray(1, data_, j);
 
                             if (j - h >= 0) {
-                                MarkArray(2, data_, j - h);
                             }
                         }
                         data_[j] = v;
@@ -295,7 +270,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                 ptrdiff_t j = i;
 
                 while (j >= h && data_[j - h] > v) {
-                    MarkArray(1, data_, j);
 
                     data_[j] = data_[j - h];
                     j -= h;
@@ -386,8 +360,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                     swap(data_[i], data_[i + gap]);
                     swapped = true;
                 }
-                MarkArray(1, data_, i);
-                MarkArray(2, data_, i + gap);
             }
         }
     }
@@ -420,7 +392,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
 
         for (ptrdiff_t i = end - size; i < end; ++i) {
             ptrdiff_t j = bogoRandInt(engine, start, i + 1);
-            MarkArray(1, data_, j);
             data_[data_[j] == 0 ? j : i] = 1;
         }
     }
@@ -471,16 +442,13 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
     // BogoSorting.isRangeSplit (mid belongs to the ending side of the range).
     template<class T>
     bool isRangeSplit(std::vector<T>& data_, ptrdiff_t start, ptrdiff_t mid, ptrdiff_t end) {
-        MarkArray(1, data_, start);
         T lowMax = data_[start];
         for (ptrdiff_t i = start + 1; i < mid; ++i) {
-            MarkArray(1, data_, i);
             if (lowMax < data_[i])
                 lowMax = data_[i];
         }
 
         for (ptrdiff_t i = mid; i < end; ++i) {
-            MarkArray(1, data_, i);
             if (lowMax > data_[i])
                 return false;
         }
@@ -508,8 +476,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
             for (ptrdiff_t nxt = 0; nxt < end - start; ++nxt) {
                 if (low >= mid && high >= end) break;
 
-                MarkArray(1, data_, low);
-                MarkArray(2, data_, high);
 
                 if (low < mid && high >= end) {
                     tmp[nxt] = data_[low];
@@ -655,7 +621,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
 
                 while (c < c_max) {
                     swap_[c] = data_[d + left];
-                    MarkArray(1, data_, d + left);
                     ++c;
                     ++d;
                 }
@@ -671,13 +636,11 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
 
                     while (c >= s) {
                         while (data_[d + left] > swap_[c]) {
-                            MarkArray(2, data_, c + left + offset);
                             data_[e + left] = data_[d + left];
                             --e;
                             --d;
                         }
 
-                        MarkArray(2, data_, c + left + offset);
                         data_[e + left] = swap_[c];
                         --e;
                         --c;
@@ -692,7 +655,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                     while (d >= a)
                     {
                         while (data_[d + left] <= swap_[c]) {
-                            MarkArray(2, data_, c + left + offset);
                             data_[e + left] = swap_[c];
                             --e;
                             --c;
@@ -704,7 +666,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                     }
 
                     while (c >= s) {
-                        MarkArray(2, data_, c + left + offset);
                         data_[e + left] = swap_[c];
                         --e;
                         --c;
@@ -784,7 +745,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
         for (ptrdiff_t i = 0; size > 0; i++) {
             ptrdiff_t min = heap[0];
 
-            MarkArray(2, src, pa[min]);
 
             dest[i] = src[pa[min]];
             pa[min] = pa[min] + 1;
@@ -892,7 +852,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
     ptrdiff_t blockLeftBinSearch(std::vector<T>& data_, ptrdiff_t a, ptrdiff_t b, const T& val) {
         while (a < b) {
             ptrdiff_t m = a + (b - a) / 2;
-            MarkArray(2, data_, m);
 
             if (CompareValues(val, data_[m]) <= 0)
                 b = m;
@@ -907,7 +866,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
     ptrdiff_t blockRightBinSearch(std::vector<T>& data_, ptrdiff_t a, ptrdiff_t b, const T& val) {
         while (a < b) {
             ptrdiff_t m = a + (b - a) / 2;
-            MarkArray(2, data_, m);
 
             if (CompareValues(val, data_[m]) < 0)
                 b = m;
@@ -956,7 +914,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
         ptrdiff_t p = a, pEnd = a + nKeys;
 
         for (ptrdiff_t i = pEnd; i < b && nKeys < n; ++i) {
-            MarkArray(1, data_, i);
             ptrdiff_t loc = blockLeftBinSearch(data_, p, pEnd, data_[i]);
 
             if (pEnd == loc || CompareValues(data_[i], data_[loc]) != 0) {
@@ -981,7 +938,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
         ptrdiff_t p = b - nKeys, pEnd = b;
 
         for (ptrdiff_t i = p - 1; i >= a && nKeys < n; --i) {
-            MarkArray(1, data_, i);
             ptrdiff_t loc = blockLeftBinSearch(data_, p, pEnd, data_[i]);
 
             if (pEnd == loc || CompareValues(data_[i], data_[loc]) != 0) {
@@ -1146,7 +1102,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
 
         using std::swap;
         while (a < m && i < b) {
-            MarkArray(2, data_, i);
 
             if (CompareValues(data_[a], data_[i]) <= 0) {
                 swap(data_[p], data_[a]);
@@ -1171,7 +1126,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
 
         using std::swap;
         while (b >= m && i >= a) {
-            MarkArray(2, data_, i);
 
             if (CompareValues(data_[b], data_[i]) >= 0) {
                 --p;
@@ -1196,7 +1150,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
         ptrdiff_t i = m;
 
         while (a < m && i < b) {
-            MarkArray(2, data_, i);
 
             if (CompareValues(data_[a], data_[i]) <= 0) {
                 data_[p] = data_[a];
@@ -1220,7 +1173,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
         --b;
 
         while (b >= m && i >= a) {
-            MarkArray(2, data_, i);
 
             if (CompareValues(data_[b], data_[i]) >= 0) {
                 --p;
@@ -1300,13 +1252,11 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
             ++i;
             while (i <= r && binaryQuickGetBit(data_, i, bit) == 0) {
                 ++i;
-                MarkArray(1, data_, i);
             }
             // Right is set
             --j;
             while (j >= p && binaryQuickGetBit(data_, j, bit) == 1) {
                 --j;
-                MarkArray(2, data_, j);
             }
             // If i is less than j, we swap, otherwise we are done
             if (i < j) {
@@ -1383,7 +1333,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
         for (ptrdiff_t i = 0; i < length; ++i) {
             ptrdiff_t value = static_cast<ptrdiff_t>(data_[start + i]);
             registers[value / num].push_back(value);
-            MarkArray(1, data_, start + i);
         }
 
         // Writes.transcribe(array, registers, 0, ...): the bucket values are written back
@@ -1414,7 +1363,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                 else
                     tmp[j] = static_cast<ptrdiff_t>(data_[start + i * num + j]);
 
-                MarkArray(2, data_, start + i * num + j);
             }
 
             for (size_t j = 0; j < tmp.size(); ++j) {
@@ -1425,7 +1373,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                 }
 
                 data_[start + i * num + (tmpj % num)] = static_cast<int>(tmpj);
-                MarkArray(1, data_, start + i * num + (tmpj % num));
             }
         }
     }
@@ -1636,21 +1583,13 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                 ptrdiff_t it = first;
                 for (ptrdiff_t i = 0; i < PdqBlockSize;) {
                     leftOffsets[leftNum] = i; ++i; leftNum += 1 - pdqLessThan(data_[it++], pivot);
-                    MarkArray(2, data_, it);
                     leftOffsets[leftNum] = i; ++i; leftNum += 1 - pdqLessThan(data_[it++], pivot);
-                    MarkArray(2, data_, it);
                     leftOffsets[leftNum] = i; ++i; leftNum += 1 - pdqLessThan(data_[it++], pivot);
-                    MarkArray(2, data_, it);
                     leftOffsets[leftNum] = i; ++i; leftNum += 1 - pdqLessThan(data_[it++], pivot);
-                    MarkArray(2, data_, it);
                     leftOffsets[leftNum] = i; ++i; leftNum += 1 - pdqLessThan(data_[it++], pivot);
-                    MarkArray(2, data_, it);
                     leftOffsets[leftNum] = i; ++i; leftNum += 1 - pdqLessThan(data_[it++], pivot);
-                    MarkArray(2, data_, it);
                     leftOffsets[leftNum] = i; ++i; leftNum += 1 - pdqLessThan(data_[it++], pivot);
-                    MarkArray(2, data_, it);
                     leftOffsets[leftNum] = i; ++i; leftNum += 1 - pdqLessThan(data_[it++], pivot);
-                    MarkArray(2, data_, it);
                 }
             }
             if (rightNum == 0) {
@@ -1658,21 +1597,13 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                 ptrdiff_t it = last;
                 for (ptrdiff_t i = 0; i < PdqBlockSize;) {
                     ++i; rightOffsets[rightNum] = i; --it; rightNum += pdqLessThan(data_[it], pivot);
-                    MarkArray(2, data_, it);
                     ++i; rightOffsets[rightNum] = i; --it; rightNum += pdqLessThan(data_[it], pivot);
-                    MarkArray(2, data_, it);
                     ++i; rightOffsets[rightNum] = i; --it; rightNum += pdqLessThan(data_[it], pivot);
-                    MarkArray(2, data_, it);
                     ++i; rightOffsets[rightNum] = i; --it; rightNum += pdqLessThan(data_[it], pivot);
-                    MarkArray(2, data_, it);
                     ++i; rightOffsets[rightNum] = i; --it; rightNum += pdqLessThan(data_[it], pivot);
-                    MarkArray(2, data_, it);
                     ++i; rightOffsets[rightNum] = i; --it; rightNum += pdqLessThan(data_[it], pivot);
-                    MarkArray(2, data_, it);
                     ++i; rightOffsets[rightNum] = i; --it; rightNum += pdqLessThan(data_[it], pivot);
-                    MarkArray(2, data_, it);
                     ++i; rightOffsets[rightNum] = i; --it; rightNum += pdqLessThan(data_[it], pivot);
-                    MarkArray(2, data_, it);
                 }
             }
 
@@ -1708,7 +1639,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
             ptrdiff_t it = first;
             for (ptrdiff_t i = 0; i < leftSize;) {
                 leftOffsets[leftNum] = i; ++i; leftNum += 1 - pdqLessThan(data_[it++], pivot);
-                MarkArray(2, data_, it);
             }
         }
         if (unknownLeft != 0 && rightNum == 0) {
@@ -1716,7 +1646,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
             ptrdiff_t it = last;
             for (ptrdiff_t i = 0; i < rightSize;) {
                 ++i; rightOffsets[rightNum] = i; --it; rightNum += pdqLessThan(data_[it], pivot);
-                MarkArray(2, data_, it);
             }
         }
 
@@ -1772,7 +1701,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
         // guarantees this exists).
         ++first;
         while (CompareValues(data_[first], pivot) < 0) {
-            MarkArray(1, data_, first);
             ++first;
         }
 
@@ -1782,14 +1710,12 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
             while (first < last) {
                 --last;
                 if (CompareValues(data_[last], pivot) < 0) break;
-                MarkArray(2, data_, last);
             }
         }
         else {
             while (true) {
                 --last;
                 if (CompareValues(data_[last], pivot) < 0) break;
-                MarkArray(2, data_, last);
             }
         }
 
@@ -1804,13 +1730,11 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
             swap(data_[first], data_[last]);
             ++first;
             while (CompareValues(data_[first], pivot) < 0) {
-                MarkArray(1, data_, first);
                 ++first;
             }
             while (true) {
                 --last;
                 if (CompareValues(data_[last], pivot) < 0) break;
-                MarkArray(2, data_, last);
             }
         }
 
@@ -1835,21 +1759,18 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
         while (true) {
             --last;
             if (!(CompareValues(pivot, data_[last]) < 0)) break;
-            MarkArray(2, data_, last);
         }
 
         if (last + 1 == end) {
             while (first < last) {
                 ++first;
                 if (CompareValues(pivot, data_[first]) < 0) break;
-                MarkArray(1, data_, first);
             }
         }
         else {
             while (true) {
                 ++first;
                 if (CompareValues(pivot, data_[first]) < 0) break;
-                MarkArray(1, data_, first);
             }
         }
 
@@ -1858,12 +1779,10 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
             while (true) {
                 --last;
                 if (!(CompareValues(pivot, data_[last]) < 0)) break;
-                MarkArray(2, data_, last);
             }
             while (true) {
                 ++first;
                 if (CompareValues(pivot, data_[first]) < 0) break;
-                MarkArray(1, data_, first);
             }
         }
 
@@ -2251,8 +2170,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
         ptr = start + 4;
 
         for (ptrdiff_t i = 0; i < 3; ++i) {
-            MarkArray(2, from, ptl);
-            MarkArray(3, from, ptr);
 
             if (CompareValues(from[ptl], from[ptr]) <= 0) {
                 dest[auxP] = from[ptl];
@@ -2264,8 +2181,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
             }
         }
 
-        MarkArray(2, from, ptl);
-        MarkArray(3, from, ptr);
 
         if (CompareValues(from[ptl], from[ptr]) <= 0)
             dest[auxP] = from[ptl];
@@ -2277,8 +2192,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
         auxP += 4;
 
         for (ptrdiff_t i = 0; i < 3; ++i) {
-            MarkArray(2, from, ptl);
-            MarkArray(3, from, ptr);
 
             if (CompareValues(from[ptl], from[ptr]) > 0) {
                 dest[auxP] = from[ptl];
@@ -2290,8 +2203,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
             }
         }
 
-        MarkArray(2, from, ptl);
-        MarkArray(3, from, ptr);
 
         if (CompareValues(from[ptl], from[ptr]) > 0)
             dest[auxP] = from[ptl];
@@ -2309,8 +2220,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
         ptr = 8;
 
         for (ptrdiff_t i = 0; i < 7; ++i) {
-            MarkArray(2, from, ptl);
-            MarkArray(3, from, ptr);
 
             if (CompareValues(from[ptl], from[ptr]) <= 0) {
                 dest[mainP] = from[ptl];
@@ -2322,8 +2231,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
             }
         }
 
-        MarkArray(2, from, ptl);
-        MarkArray(3, from, ptr);
 
         if (CompareValues(from[ptl], from[ptr]) <= 0)
             dest[mainP] = from[ptl];
@@ -2335,8 +2242,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
         mainP += 8;
 
         for (ptrdiff_t i = 0; i < 7; ++i) {
-            MarkArray(2, from, ptl);
-            MarkArray(3, from, ptr);
 
             if (CompareValues(from[ptl], from[ptr]) > 0) {
                 dest[mainP] = from[ptl];
@@ -2348,8 +2253,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
             }
         }
 
-        MarkArray(2, from, ptl);
-        MarkArray(3, from, ptr);
 
         if (CompareValues(from[ptl], from[ptr]) > 0)
             dest[mainP] = from[ptl];
@@ -2390,7 +2293,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
 
         for (ptrdiff_t i = r; i < r + (e - m); ++i) {
             aux[i - r] = data_[i];
-            MarkArray(1, data_, i);
         }
 
         s = e - r;
@@ -2401,13 +2303,11 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
         if (data_[start] <= aux[0]) {
             do {
                 while (data_[m] > aux[s]) {
-                    MarkArray(2, data_, m);
                     data_[e] = data_[m];
                     --e;
                     --m;
                 }
 
-                MarkArray(2, data_, m);
                 data_[e] = aux[s];
                 --e;
                 --s;
@@ -2417,13 +2317,11 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
         else {
             do {
                 while (data_[m] <= aux[s]) {
-                    MarkArray(2, data_, m);
                     data_[e] = aux[s];
                     --e;
                     --s;
                 }
 
-                MarkArray(2, data_, m);
                 data_[e] = data_[m];
                 --e;
                 --m;
@@ -2473,8 +2371,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
         e = r + block;
 
         if (toAux) {
-            MarkArray(1, from, r - 1);
-            MarkArray(2, from, e - 1);
         }
 
         if (CompareValues(from[r - 1], from[e - 1]) <= 0) {
@@ -2482,8 +2378,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                 for (ptrdiff_t i = 0; i < 3; ++i) {
                     if (CompareValues(from[l], from[r]) <= 0) {
                         if (toAux) {
-                            MarkArray(1, from, l);
-                            MarkArray(2, from, r);
                         }
                         dest[mergeP] = from[l];
                         ++mergeP; ++l;
@@ -2491,8 +2385,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                     }
 
                     if (toAux) {
-                        MarkArray(1, from, l);
-                        MarkArray(2, from, r);
                     }
                     dest[mergeP] = from[r];
                     ++mergeP; ++r;
@@ -2501,8 +2393,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
 
             do {
                 if (toAux) {
-                    MarkArray(1, from, l - 1);
-                    MarkArray(2, from, r);
                 }
                 dest[mergeP] = from[r];
                 ++mergeP; ++r;
@@ -2514,8 +2404,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                 for (ptrdiff_t i = 0; i < 3; ++i) {
                     if (CompareValues(from[l], from[r]) > 0) {
                         if (toAux) {
-                            MarkArray(1, from, l);
-                            MarkArray(2, from, r);
                         }
                         dest[mergeP] = from[r];
                         ++mergeP; ++r;
@@ -2523,8 +2411,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                     }
 
                     if (toAux) {
-                        MarkArray(1, from, l);
-                        MarkArray(2, from, r);
                     }
                     dest[mergeP] = from[l];
                     ++mergeP; ++l;
@@ -2533,8 +2419,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
 
             do {
                 if (toAux) {
-                    MarkArray(1, from, l);
-                    MarkArray(2, from, r - 1);
                 }
                 dest[mergeP] = from[l];
                 ++mergeP; ++l;
@@ -2570,7 +2454,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                 do {
                     aux[pts] = data_[c];
                     ++c;
-                    MarkArray(1, data_, pts + start);
                     ++pts;
                 } while (c < cMax); // step 1
 
@@ -2578,7 +2461,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                 do {
                     aux[pts] = data_[c];
                     ++c;
-                    MarkArray(1, data_, pts + start);
                     ++pts;
                 } while (c < cMax); // step 2
 
@@ -2593,7 +2475,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
             do {
                 aux[pts] = data_[c];
                 ++c;
-                MarkArray(1, data_, pts + start);
                 ++pts;
             } while (c < cMax); // step 1
         }
@@ -2914,7 +2795,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                     left = mid;
                 }
             }
-            MarkArray(1, data_, pos + mid);
         }
         return right;
     }
@@ -2974,8 +2854,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                 grailSwap(data_, pos + dist, pos + left);
                 ++dist; ++left;
             }
-            MarkArray(3, data_, pos + left);
-            MarkArray(4, data_, pos + right);
         }
 
         if (dist != left) grailMultiSwap(data_, pos + dist, pos + left, leftLen - left);
@@ -2997,8 +2875,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                 grailSwap(data_, pos + mergedPos, pos + right);
                 --mergedPos; --right;
             }
-            if (pos + left >= 0) MarkArray(3, data_, pos + left);
-            MarkArray(4, data_, pos + right);
         }
 
         if (right != mergedPos) {
@@ -3024,8 +2900,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                 grailSwap(data_, pos + dist, pos + right);
                 ++dist; ++right;
             }
-            MarkArray(3, data_, pos + left);
-            MarkArray(4, data_, pos + right);
         }
 
         ptrdiff_t length;
@@ -3210,8 +3084,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
         ptrdiff_t dist = 1, foundKeys = 1, firstKey = 0; // first key is always here
 
         while (dist < len && foundKeys < numKeys) {
-            // Java marks (3, dist + 1) without adding pos; kept as is.
-            if (dist < (len - 1)) MarkArray(3, data_, dist + 1);
 
             // Binary Search left
             ptrdiff_t loc = grailBinSearch(data_, pos + firstKey, foundKeys, pos + dist, true);
@@ -3285,8 +3157,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                 grailSwap(data_, pos + dist, pos + right);
                 ++dist; ++right;
             }
-            MarkArray(3, data_, pos + left);
-            MarkArray(4, data_, pos + right);
         }
 
         ptrdiff_t length, fragment = leftOverFrag;
@@ -3324,8 +3194,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                 data_[pos + dist] = data_[pos + right];
                 ++dist; ++right;
             }
-            MarkArray(2, data_, pos + left);
-            MarkArray(3, data_, pos + right);
         }
 
         ptrdiff_t length, fragment = leftOverFrag;
@@ -3363,8 +3231,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                 data_[pos + dist] = data_[pos + left];
                 ++dist; ++left;
             }
-            MarkArray(2, data_, pos + left);
-            MarkArray(3, data_, pos + right);
         }
 
         if (dist != left) {
@@ -3685,8 +3551,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
             if (CompareValues(data_[pos + dist - 1], data_[pos + dist]) > 0) {
                 grailSwap(data_, pos + (dist - 1), pos + dist);
             }
-            MarkArray(3, data_, pos + dist - 1);
-            MarkArray(4, data_, pos + dist);
         }
 
         for (ptrdiff_t part = 2; part < len; part *= 2) {
@@ -3897,14 +3761,12 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
         ++runHi;
         if (firstComp < 0) { // Descending
             while (runHi < hi && CompareValues(data_[runHi], data_[runHi - 1]) < 0) {
-                MarkArray(1, data_, runHi);
                 ++runHi;
             }
             reverseRange(data_, lo, runHi);
         }
         else {               // Ascending
             while (runHi < hi && CompareValues(data_[runHi], data_[runHi - 1]) >= 0) {
-                MarkArray(1, data_, runHi);
                 ++runHi;
             }
         }
@@ -3935,13 +3797,11 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
         ptrdiff_t lastOfs = 0;
         ptrdiff_t ofs = 1;
 
-        MarkArray(3, data_, base + hint);
 
         if (CompareValues(key, data_[base + hint]) > 0) {
             // Gallop right until data_[base+hint+lastOfs] < key <= data_[base+hint+ofs]
             ptrdiff_t maxOfs = len - hint;
 
-            MarkArray(3, data_, base + hint + ofs);
 
             while (ofs < maxOfs && CompareValues(key, data_[base + hint + ofs]) > 0) {
                 lastOfs = ofs;
@@ -3950,7 +3810,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                     ofs = maxOfs;
                 }
 
-                MarkArray(3, data_, base + hint + ofs);
             }
             if (ofs > maxOfs) ofs = maxOfs;
 
@@ -3962,7 +3821,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
             // Gallop left until data_[base+hint-ofs] < key <= data_[base+hint-lastOfs]
             ptrdiff_t maxOfs = hint + 1;
 
-            MarkArray(3, data_, base + hint - ofs);
 
             while (ofs < maxOfs && CompareValues(key, data_[base + hint - ofs]) <= 0) {
                 lastOfs = ofs;
@@ -3971,7 +3829,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                     ofs = maxOfs;
                 }
 
-                MarkArray(3, data_, base + hint - ofs);
             }
             if (ofs > maxOfs) ofs = maxOfs;
 
@@ -3987,7 +3844,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
         while (lastOfs < ofs) {
             ptrdiff_t m = lastOfs + ((ofs - lastOfs) >> 1);
 
-            MarkArray(3, data_, base + m);
 
             if (CompareValues(key, data_[base + m]) > 0) lastOfs = m + 1; // data_[base + m] < key
             else ofs = m;                                                 // key <= data_[base + m]
@@ -4001,13 +3857,11 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
         ptrdiff_t ofs = 1;
         ptrdiff_t lastOfs = 0;
 
-        MarkArray(3, data_, base + hint);
 
         if (CompareValues(key, data_[base + hint]) < 0) {
             // Gallop left until data_[base+hint-ofs] <= key < data_[base+hint-lastOfs]
             ptrdiff_t maxOfs = hint + 1;
 
-            MarkArray(3, data_, base + hint - ofs);
 
             while (ofs < maxOfs && CompareValues(key, data_[base + hint - ofs]) < 0) {
                 lastOfs = ofs;
@@ -4016,7 +3870,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                     ofs = maxOfs;
                 }
 
-                MarkArray(3, data_, base + hint - ofs);
             }
             if (ofs > maxOfs) ofs = maxOfs;
 
@@ -4029,7 +3882,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
             // Gallop right until data_[base+hint+lastOfs] <= key < data_[base+hint+ofs]
             ptrdiff_t maxOfs = len - hint;
 
-            MarkArray(3, data_, base + hint + ofs);
 
             while (ofs < maxOfs && CompareValues(key, data_[base + hint + ofs]) >= 0) {
                 lastOfs = ofs;
@@ -4038,7 +3890,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                     ofs = maxOfs;
                 }
 
-                MarkArray(3, data_, base + hint + ofs);
             }
             if (ofs > maxOfs) ofs = maxOfs;
 
@@ -4053,7 +3904,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
         while (lastOfs < ofs) {
             ptrdiff_t m = lastOfs + ((ofs - lastOfs) >> 1);
 
-            MarkArray(3, data_, base + m);
 
             if (CompareValues(key, data_[base + m]) < 0) ofs = m;          // key < data_[base + m]
             else lastOfs = m + 1;                                          // data_[base + m] <= key
@@ -4100,8 +3950,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
         // Move first element of second run and deal with degenerate cases
         data_[dest] = data_[cursor2];
         ++dest; ++cursor2;
-        MarkArray(1, data_, dest);
-        MarkArray(2, data_, cursor2);
         if (--len2 == 0) {
             for (ptrdiff_t i = 0; i < len1; ++i) data_[dest + i] = tmp[cursor1 + i];
             return;
@@ -4109,7 +3957,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
         if (len1 == 1) {
             for (ptrdiff_t i = 0; i < len2; ++i) data_[dest + i] = data_[cursor2 + i];
             data_[dest + len2] = tmp[cursor1]; // Last elt of run 1 to end of merge
-            MarkArray(1, data_, dest + len2);
             return;
         }
 
@@ -4125,8 +3972,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                     if (CompareValues(data_[cursor2], tmp[cursor1]) < 0) {
                         data_[dest] = data_[cursor2];
                         ++dest; ++cursor2;
-                        MarkArray(1, data_, dest);
-                        MarkArray(2, data_, cursor2);
                         ++count2;
                         count1 = 0;
                         if (--len2 == 0) return;
@@ -4134,7 +3979,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                     else {
                         data_[dest] = tmp[cursor1];
                         ++dest; ++cursor1;
-                        MarkArray(1, data_, dest);
                         ++count1;
                         count2 = 0;
                         if (--len1 == 1) return;
@@ -4154,8 +3998,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                     }
                     data_[dest] = data_[cursor2];
                     ++dest; ++cursor2;
-                    MarkArray(1, data_, dest);
-                    MarkArray(2, data_, cursor2);
                     if (--len2 == 0) return;
 
                     count2 = timGallopLeft(ts, tmp[cursor1], data_, cursor2, len2, 0);
@@ -4168,7 +4010,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                     }
                     data_[dest] = tmp[cursor1];
                     ++dest; ++cursor1;
-                    MarkArray(1, data_, dest);
                     if (--len1 == 1) return;
                     --minGallop;
                 } while (count1 >= TimSortMinGallop || count2 >= TimSortMinGallop);
@@ -4184,7 +4025,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
         if (len1 == 1) {
             for (ptrdiff_t i = 0; i < len2; ++i) data_[dest + i] = data_[cursor2 + i];
             data_[dest + len2] = tmp[cursor1]; // Last elt of run 1 to end of merge
-            MarkArray(1, data_, dest + len2);
         }
         else if (len1 == 0) {
             throw WideError(L"Comparison method violates its general contract!");
@@ -4211,8 +4051,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
         // Move last element of first run and deal with degenerate cases
         data_[dest] = data_[cursor1];
         --dest; --cursor1;
-        MarkArray(1, data_, dest);
-        MarkArray(2, data_, cursor1);
         if (--len1 == 0) {
             for (ptrdiff_t i = 0; i < len2; ++i) data_[dest - (len2 - 1) + i] = tmp[i];
             return;
@@ -4223,7 +4061,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
             // Overlapping shift (dest > cursor1): copy backwards (memmove semantics).
             for (ptrdiff_t i = len1 - 1; i >= 0; --i) data_[dest + 1 + i] = data_[cursor1 + 1 + i];
             data_[dest] = tmp[cursor2];
-            MarkArray(1, data_, dest);
             return;
         }
 
@@ -4239,8 +4076,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                     if (CompareValues(tmp[cursor2], data_[cursor1]) < 0) {
                         data_[dest] = data_[cursor1];
                         --dest; --cursor1;
-                        MarkArray(1, data_, dest);
-                        MarkArray(2, data_, cursor1);
                         ++count1;
                         count2 = 0;
                         if (--len1 == 0) return;
@@ -4248,7 +4083,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                     else {
                         data_[dest] = tmp[cursor2];
                         --dest; --cursor2;
-                        MarkArray(1, data_, dest);
                         ++count2;
                         count1 = 0;
                         if (--len2 == 1) return;
@@ -4269,7 +4103,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                     }
                     data_[dest] = tmp[cursor2];
                     --dest; --cursor2;
-                    MarkArray(1, data_, dest);
                     if (--len2 == 1) return;
 
                     count2 = len2 - timGallopLeft(ts, data_[cursor1], tmp, 0, len2, len2 - 1);
@@ -4282,8 +4115,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                     }
                     data_[dest] = data_[cursor1];
                     --dest; --cursor1;
-                    MarkArray(1, data_, dest);
-                    MarkArray(2, data_, cursor1);
                     if (--len1 == 0) return;
                     --minGallop;
                 } while (count1 >= TimSortMinGallop || count2 >= TimSortMinGallop);
@@ -4302,7 +4133,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
             // Overlapping shift (dest > cursor1): copy backwards (memmove semantics).
             for (ptrdiff_t i = len1 - 1; i >= 0; --i) data_[dest + 1 + i] = data_[cursor1 + 1 + i];
             data_[dest] = tmp[cursor2]; // Move first elt of run2 to front of merge
-            MarkArray(1, data_, dest);
         }
         else if (len2 == 0) {
             throw WideError(L"Comparison method violates its general contract!");
@@ -4686,8 +4516,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
             if (CompareValues(from[B_index], from[A_index]) >= 0) {
                 into[insert_index] = from[A_index];
 
-                if (tempwrite) MarkArray(1, from, A_index);
-                else MarkArray(1, into, insert_index);
 
                 ++A_index;
                 ++insert_index;
@@ -4700,8 +4528,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
             else {
                 into[insert_index] = from[B_index];
 
-                if (tempwrite) MarkArray(1, from, B_index);
-                else MarkArray(1, into, insert_index);
 
                 ++B_index;
                 ++insert_index;
@@ -4726,8 +4552,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
 
         if (wikiLength(B) > 0 && wikiLength(A) > 0) {
             while (true) {
-                MarkArray(3, data_, A_index);
-                MarkArray(4, data_, B_index);
                 if (CompareValues(data_[B_index], cache[A_index]) >= 0) {
                     data_[insert_index] = cache[A_index];
                     ++A_index;
@@ -4760,14 +4584,12 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
         if (wikiLength(B) > 0 && wikiLength(A) > 0) {
             while (true) {
                 if (CompareValues(data_[B.start + B_count], data_[buffer.start + A_count]) >= 0) {
-                    MarkArray(3, data_, buffer.start + A_count);
                     swap(data_[A.start + insert], data_[buffer.start + A_count]);
                     ++A_count;
                     ++insert;
                     if (A_count >= wikiLength(A)) break;
                 }
                 else {
-                    MarkArray(3, data_, B.start + B_count);
                     swap(data_[A.start + insert], data_[B.start + B_count]);
                     ++B_count;
                     ++insert;
@@ -5431,7 +5253,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
     template<class T>
     void kotaSwap(std::vector<T>& data_, ptrdiff_t a, ptrdiff_t b, bool aux) {
         if (aux) {
-            MarkArray(2, data_, b);
             data_[a] = data_[b];
         }
         else {
@@ -5523,7 +5344,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
         ptrdiff_t numKeys = 1, pos = start, posEnd = start + 1;
 
         for (ptrdiff_t i = start + 1; i < end && numKeys < num; ++i) {
-            MarkArray(2, data_, i);
             ptrdiff_t loc = kotaBinarySearch(data_, pos, posEnd, data_[i], true);
             if (i == loc || CompareValues(data_[i], data_[loc]) != 0) {
                 kotaRotate(data_, st, pos, posEnd, i);
@@ -5544,8 +5364,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
     template<class T>
     void kotaSwapToTags(std::vector<T>& data_, KotaState<T>& st, ptrdiff_t a, ptrdiff_t i, bool aux) {
         if (aux) {
-            MarkArray(1, data_, a);
-            MarkArray(2, data_, i);
             T temp = st.tags[i];
             st.tags[i] = data_[a];
             data_[a] = temp;
@@ -5709,7 +5527,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
             ++k;
 
             while (i < m) {
-                MarkArray(3, data_, m);
                 while (i < m && k < end && CompareValues(data_[m], data_[k]) == 1) {
                     swap(data_[i], data_[k]);
                     ++i;
@@ -6220,7 +6037,6 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
             i = st.bufLen - 1;
             j = (b - 1) - st.bufLen;
             k = b - 1;
-            MarkArray(2, data_, a + i);
             while (i >= 0 && j >= a) {
                 if (CompareValues(data_[j], st.cache[i]) >= 0) {
                     m = kotaBinarySearch(data_, a, j + 1, st.cache[i], true);
@@ -6233,20 +6049,17 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                 data_[k] = st.cache[i];
                 --k;
                 --i;
-                if (i > 0) MarkArray(2, data_, a + i);
             }
             while (i >= 0) {
                 data_[k] = st.cache[i];
                 --k;
                 --i;
-                if (i > 0) MarkArray(2, data_, a + i);
             }
         }
         else {
             i = 0;
             j = a + st.bufLen;
             k = a;
-            MarkArray(2, data_, a + i);
             while (i < st.bufLen && j < b) {
                 if (CompareValues(data_[j], st.cache[i]) == -1) {
                     m = kotaBinarySearch(data_, j, b, st.cache[i], true);
@@ -6259,13 +6072,11 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
                 data_[k] = st.cache[i];
                 ++k;
                 ++i;
-                MarkArray(2, data_, a + i);
             }
             while (i < st.bufLen) {
                 data_[k] = st.cache[i];
                 ++k;
                 ++i;
-                MarkArray(2, data_, a + i);
             }
         }
     }

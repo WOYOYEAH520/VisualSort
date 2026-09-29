@@ -26,7 +26,6 @@ namespace NVisualSort::NSortAlgorithms {
         ptrdiff_t size = static_cast<ptrdiff_t>(data_.size());
 
         for (ptrdiff_t i = 0; i < length; ++i) {
-            NSortHelpers::MarkArray(1, data_, i);
 
             if (i + 1 >= size) {
                 break; // defensive: callers always pass length <= size - 1
@@ -44,12 +43,10 @@ namespace NVisualSort::NSortAlgorithms {
         int max = (std::numeric_limits<int>::min)(); // Integer.MIN_VALUE (parenthesized: Windows.h min macro)
 
         for (ptrdiff_t i = 0; i <= end; ++i) {
-            NSortHelpers::MarkArray(1, data_, i);
 
             if (NSortHelpers::CompareValues(static_cast<int>(data_[i]), max) == 1) {
                 max = static_cast<int>(data_[i]);
                 index = i;
-                NSortHelpers::MarkArray(2, data_, i);
             }
         }
         return index;
@@ -247,7 +244,6 @@ namespace NVisualSort::NSortAlgorithms {
         if (currentLength < 2) return;
 
         for (ptrdiff_t i = 1; i < currentLength; ++i) {
-            NSortHelpers::MarkArray(1, data_, i);
 
             if (data_[i - 1] > data_[i]) {
                 data_[i] = data_[i - 1];

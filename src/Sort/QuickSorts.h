@@ -60,7 +60,6 @@ namespace NVisualSort::NSortAlgorithms {
                 using std::swap;
                 swap(data_[p], data_[hi - 1]);
             }
-            NSortHelpers::MarkArray(1, data_, hi - 1);
 
             ptrdiff_t i = lo;
             ptrdiff_t k = hi - 1;
@@ -72,13 +71,11 @@ namespace NVisualSort::NSortAlgorithms {
                     using std::swap;
                     swap(data_[k], data_[j]);
                     --j;
-                    NSortHelpers::MarkArray(4, data_, k);
                 }
                 else if (cmp < 0) {
                     using std::swap;
                     swap(data_[i], data_[j]);
                     ++i;
-                    NSortHelpers::MarkArray(3, data_, i);
                 }
             }
 
@@ -160,29 +157,24 @@ namespace NVisualSort::NSortAlgorithms {
             ptrdiff_t p = lo;
             ptrdiff_t q = hi - 1;
 
-            NSortHelpers::MarkArray(3, data_, j);
 
             for (;;) {
                 while (i <= j && (cmp = NSortHelpers::CompareValues(data_[i], pivot)) <= 0) {
                     if (cmp == 0) {
-                        NSortHelpers::MarkArray(4, data_, p);
                         using std::swap;
                         swap(data_[i], data_[p]);
                         ++p;
                     }
                     ++i;
-                    NSortHelpers::MarkArray(3, data_, i);
                 }
 
                 while (i <= j && (cmp = NSortHelpers::CompareValues(data_[j], pivot)) >= 0) {
                     if (cmp == 0) {
-                        NSortHelpers::MarkArray(4, data_, q);
                         using std::swap;
                         swap(data_[j], data_[q]);
                         --q;
                     }
                     --j;
-                    NSortHelpers::MarkArray(3, data_, j);
                 }
 
                 if (i > j) break;
@@ -193,7 +185,6 @@ namespace NVisualSort::NSortAlgorithms {
                 }
                 ++i;
                 --j;
-                NSortHelpers::MarkArray(3, data_, j);
             }
 
             {
@@ -206,20 +197,17 @@ namespace NVisualSort::NSortAlgorithms {
 
             j = i - 1;
             i = i + 1;
-            NSortHelpers::MarkArray(3, data_, i);
 
             ptrdiff_t pe = lo + (std::min)(p - lo, num_less);
             for (ptrdiff_t k = lo; k < pe; ++k, --j) {
                 using std::swap;
                 swap(data_[k], data_[j]);
-                NSortHelpers::MarkArray(3, data_, j);
             }
 
             ptrdiff_t qe = hi - 1 - (std::min)(hi - 1 - q, num_greater - 1);
             for (ptrdiff_t k = hi - 1; k > qe; --k, ++i) {
                 using std::swap;
                 swap(data_[i], data_[k]);
-                NSortHelpers::MarkArray(3, data_, i);
             }
 
             self(self, lo, lo + num_less - 1);
