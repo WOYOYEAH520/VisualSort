@@ -138,6 +138,8 @@ namespace NVisualSort {
 			return *this;
 		}
 
+		public:
+
 		Strip& SetColorAuto() noexcept {
 			COLORREF tempColor = (StripLastColor - StripFirstColor) / RGB(1, 1, 1) * static_cast<size_t>(this->m_value) / Strip::s_maxValue;
 			this->m_color = RGB(tempColor, tempColor, tempColor) + StripFirstColor;
@@ -149,6 +151,8 @@ namespace NVisualSort {
 			this->SetColorAuto();
 			return *this;
 		}
+
+		private:
 
 		static void StopSort() {
 			if (std::this_thread::get_id() != Strip::s_mainThreadId) {
