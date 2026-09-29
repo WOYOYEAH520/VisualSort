@@ -1,0 +1,8 @@
+﻿.vs/
+x64/
+Debug/
+Release/
+ipch/
+*.bak
+*.user
+*.slnx.cache
