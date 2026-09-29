@@ -251,8 +251,6 @@ namespace NVisualSort {
 			const int height = GetConfigManager().GetHeight();
 			const int top = Strip::StripMaxTop();
 			GetDrawingTool().ClearRectangle(0, top, width, height);
-			// 按整根条形绘制：带黑边框的绘制函数会把1像素宽的矩形整个盖住，
-			// 因此不能按列逐像素画（相邻条形共享边界列，依次覆盖即可，与旧逻辑等价）
 			for (const auto& strip : strips_) {
 				const int l = (std::max)(0, strip.m_left);
 				const int r = (std::min)(width - 1, strip.m_right);

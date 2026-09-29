@@ -1814,7 +1814,7 @@ namespace NVisualSort::NSortAlgorithms {
                     ++q;
                 }
                 i = b;
-                while (b < length && ((static_cast<int>(data_[static_cast<size_t>(b)]) >> (q + 1)) == (m >> (q + 1)))) {
+                while (b < length && ((data_[static_cast<size_t>(b)] >> (q + 1)) == (m >> (q + 1)))) {
                     ++b;
                 }
             }
