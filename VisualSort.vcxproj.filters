@@ -57,6 +57,36 @@
     <ClInclude Include="src\Sort\Sort.h">
       <Filter>src\Sort</Filter>
     </ClInclude>
+    <ClInclude Include="src\Sort\SortHelpers.h">
+      <Filter>src\Sort</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Sort\ExchangeSorts.h">
+      <Filter>src\Sort</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Sort\SelectSorts.h">
+      <Filter>src\Sort</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Sort\InsertSorts.h">
+      <Filter>src\Sort</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Sort\MergeSorts.h">
+      <Filter>src\Sort</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Sort\DistributeSorts.h">
+      <Filter>src\Sort</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Sort\HybridSorts.h">
+      <Filter>src\Sort</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Sort\ConcurrentSorts.h">
+      <Filter>src\Sort</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Sort\MiscSorts.h">
+      <Filter>src\Sort</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Sort\QuickSorts.h">
+      <Filter>src\Sort</Filter>
+    </ClInclude>
     <ClInclude Include="src\Sort\Strip.h">
       <Filter>src\Sort</Filter>
     </ClInclude>

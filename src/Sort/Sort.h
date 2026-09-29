@@ -35,6 +35,16 @@
 #include <tuple>
 #include <unordered_map>
 #include <map>
+#include "SortHelpers.h"
+#include "ExchangeSorts.h"
+#include "SelectSorts.h"
+#include "InsertSorts.h"
+#include "MergeSorts.h"
+#include "DistributeSorts.h"
+#include "HybridSorts.h"
+#include "ConcurrentSorts.h"
+#include "MiscSorts.h"
+#include "QuickSorts.h"
 
 namespace NVisualSort {
 
