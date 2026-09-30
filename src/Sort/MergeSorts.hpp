@@ -13,7 +13,7 @@
 // is ported as MergeSortJava and its menu entry is the shared merge-sort name with the
 // "(ArrayV)" suffix (see D:\Temp\merge_register.txt for the display names). Every internal
 // helper starts with the PascalCase name of the algorithm it belongs to.
-#include "SortHelpers.h"
+#include "SortHelpers.hpp"
 #include <thread>
 #include <vector>
 #include <cstddef>

@@ -5,19 +5,19 @@
 #include <algorithm>
 #include <utility>
 #include <type_traits>
-#include "Coordinate.h"
-#include "Fraction.h"
+#include "Coordinate.hpp"
+#include "Fraction.hpp"
 #include <easyx.h>
-#include "WideError.h"
+#include "WideError.hpp"
 
 namespace NVisualSort {
 
 	constexpr unsigned int DefaultWidth = 800;
 	constexpr unsigned int DefaultHeight = 600;
-	constexpr COLORREF DefaultCanvasColor = RGB(0x33, 0x33, 0x33); // Ä¬ÈÏ»­²¼ÑÕÉ«Îª»ÒÉ«
-	constexpr wchar_t DefaultTypeface[] = L"¿¬Ìå"; // Ä¬ÈÏ×ÖÌåÎª¿¬Ìå£¬¿¬ÌåºÃ¿´Äó:£©
+	constexpr COLORREF DefaultCanvasColor = RGB(0x33, 0x33, 0x33); // é»˜è®¤ç”»å¸ƒé¢œè‰²ä¸ºç°è‰²
+	constexpr wchar_t DefaultTypeface[] = L"æ¥·ä½“"; // é»˜è®¤å­—ä½“ä¸ºæ¥·ä½“ï¼Œæ¥·ä½“å¥½çœ‹æ:ï¼‰
 
-	// ÅäÖÃ¹ÜÀíÆ÷Àà£¬Ê¹ÓÃµ¥ÀıÄ£Ê½
+	// é…ç½®ç®¡ç†å™¨ç±»ï¼Œä½¿ç”¨å•ä¾‹æ¨¡å¼
 	class ConfigManager {
 
 	private:
@@ -30,7 +30,7 @@ namespace NVisualSort {
 		std::atomic<unsigned int> m_maxHeight = DefaultHeight;
 		std::atomic<COLORREF> m_canvasColor = DefaultCanvasColor;
 
-		// µ¥ÀıÄ£Ê½ÏÂ£¬½ûÖ¹¿½±´ºÍÒÆ¶¯
+		// å•ä¾‹æ¨¡å¼ä¸‹ï¼Œç¦æ­¢æ‹·è´å’Œç§»åŠ¨
 		ConfigManager() noexcept {
 			this->SetMinMaxSizeAuto();
 		}
@@ -52,11 +52,11 @@ namespace NVisualSort {
 
 	public:
 
-		// »ñÈ¡¿í¶È
+		// è·å–å®½åº¦
 		Fraction GetWidth() const noexcept {
 			return Fraction(this->m_width.load(std::memory_order_acquire));
 		}
-		// ÉèÖÃ¿í¶È
+		// è®¾ç½®å®½åº¦
 		void SetWidth(unsigned int width_) noexcept {
 			width_ = std::clamp(width_, this->m_minWidth.load(), this->m_maxWidth.load());
 			this->m_width.store(width_, std::memory_order_release);
@@ -70,11 +70,11 @@ namespace NVisualSort {
 			return Fraction(this->m_maxWidth.load(std::memory_order_acquire));
 		}
 
-		// »ñÈ¡¸ß¶È
+		// è·å–é«˜åº¦
 		Fraction GetHeight() const noexcept {
 			return Fraction(this->m_height.load(std::memory_order_acquire));
 		}
-		// ÉèÖÃ¸ß¶È
+		// è®¾ç½®é«˜åº¦
 		void SetHeight(unsigned int height_) noexcept {
 			height_ = std::clamp(height_, this->m_minHeight.load(), this->m_maxHeight.load());
 			this->m_height.store(height_, std::memory_order_release);
@@ -91,16 +91,16 @@ namespace NVisualSort {
 		Fraction GetMaxClientHeight() const {
 			HWND hwnd = GetHWnd();
 			if (!hwnd) {
-				throw WideError(L"´°¿Ú»¹Î´´´½¨");
+				throw WideError(L"çª—å£è¿˜æœªåˆ›å»º");
 			}
 
 			RECT workArea = {};
 			SystemParametersInfo(SPI_GETWORKAREA, 0, &workArea, 0);
 			int screenWorkHeight = workArea.bottom - workArea.top;
 
-			// »ñÈ¡´°¿Ú·Ç¿Í»§Çø¸÷²¿·Ö¸ß¶È
+			// è·å–çª—å£éå®¢æˆ·åŒºå„éƒ¨åˆ†é«˜åº¦
 			RECT rcClient = { 0, 0, 0, 0 };
-			DWORD style = WS_OVERLAPPEDWINDOW;  // ÆÕÍ¨´°¿ÚÑùÊ½
+			DWORD style = WS_OVERLAPPEDWINDOW;  // æ™®é€šçª—å£æ ·å¼
 			DWORD exStyle = 0;
 			AdjustWindowRectEx(&rcClient, style, FALSE, exStyle);
 
@@ -108,12 +108,12 @@ namespace NVisualSort {
 			int bottomBorderHeight = rcClient.bottom;
 			int totalNonClientHeight = topBorderHeight + bottomBorderHeight;
 
-			// Ö»¼õÈ¥ÉÏ±ß¿òµÄÇé¿ö
+			// åªå‡å»ä¸Šè¾¹æ¡†çš„æƒ…å†µ
 			int maxClientHeight_topOnly = screenWorkHeight - topBorderHeight;
 			return Fraction(maxClientHeight_topOnly);
 		}
 
-		// ÉèÖÃ¿í¶ÈºÍ¸ß¶È
+		// è®¾ç½®å®½åº¦å’Œé«˜åº¦
 		void SetDimensions(unsigned int width_, unsigned  int height_) noexcept {
 			width_ = std::clamp(width_, this->m_minWidth.load(), this->m_maxWidth.load());
 			height_ = std::clamp(height_, this->m_minHeight.load(), this->m_maxHeight.load());
@@ -135,16 +135,16 @@ namespace NVisualSort {
 			return this->GetHeight() / 2;
 		}
 
-		// »ñÈ¡ÖĞĞÄ×ø±ê
+		// è·å–ä¸­å¿ƒåæ ‡
 		Coordinate GetCenterXY() const noexcept {
 			return Coordinate(this->GetCenterX(), this->GetCenterY());
 		}
 
-		// »ñÈ¡»­²¼ÑÕÉ«
+		// è·å–ç”»å¸ƒé¢œè‰²
 		COLORREF GetCanvasColor() const noexcept {
 			return this->m_canvasColor.load(std::memory_order_acquire);
 		}
-		// ÉèÖÃ»­²¼ÑÕÉ«
+		// è®¾ç½®ç”»å¸ƒé¢œè‰²
 		void SetCanvasColor(COLORREF color_) noexcept {
 			this->m_canvasColor.store(color_, std::memory_order_release);
 		}
@@ -153,13 +153,13 @@ namespace NVisualSort {
 			return { 0, 0, static_cast<LONG>(this->GetWidth()), static_cast<LONG>(this->GetHeight()) };
 		}
 
-		// Éú³ÉËæ»úÊı£¨Ïß³Ì°²È«£©
+		// ç”Ÿæˆéšæœºæ•°ï¼ˆçº¿ç¨‹å®‰å…¨ï¼‰
 		unsigned int GenerateRandom() const {
 			static thread_local std::mt19937 engine(std::random_device{}());
 			return engine();
 		}
 
-		// Éú³ÉÖ¸¶¨·¶Î§µÄËæ»úÊı
+		// ç”ŸæˆæŒ‡å®šèŒƒå›´çš„éšæœºæ•°
 		template<typename T = int>
 		T GenerateRandomRange(T min_value_, T max_value_) const {
 			static thread_local std::mt19937 engine(std::random_device{}());
@@ -173,7 +173,7 @@ namespace NVisualSort {
 			}
 		}
 
-		// »ñÈ¡ÅäÖÃ¹ÜÀíÆ÷ÊµÀı£¨µ¥ÀıÄ£Ê½£©
+		// è·å–é…ç½®ç®¡ç†å™¨å®ä¾‹ï¼ˆå•ä¾‹æ¨¡å¼ï¼‰
 		friend inline ConfigManager& GetConfigManager() noexcept;
 
 	};

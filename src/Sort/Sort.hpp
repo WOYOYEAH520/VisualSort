@@ -1,64 +1,35 @@
 #pragma once
-#include "Strip.h"
-#include "ConfigManager.h"
-#include "Counter.h"
+#include <string>
+#include <functional>
+#include "Counter.hpp"
+#include "Strip.hpp"
+#include <stack>
 #include <future>
 #include <execution>
-#include <Windows.h>
-#include <easyx.h>
-#include <algorithm>
-#include <atomic>
-#include <chrono>
-#include <cmath>
-#include <functional>
-#include <list>
-#include <mutex>
-#include <random>
-#include <stack>
-#include <string>
-#include <thread>
-#include <type_traits>
-#include <utility>
-#include <vector>
-#include "WideError.h"
-#include <concepts>
-#include <deque>
-#include <exception>
-#include <forward_list>
-#include <memory>
-#include <optional>
-#include <queue>
-#include <set>
-#include <shared_mutex>
-#include <sstream>
-#include <stop_token>
-#include <tuple>
-#include <unordered_map>
-#include <map>
-#include "SortHelpers.h"
-#include "ExchangeSorts.h"
-#include "SelectSorts.h"
-#include "InsertSorts.h"
-#include "MergeSorts.h"
-#include "DistributeSorts.h"
-#include "HybridSorts.h"
-#include "ConcurrentSorts.h"
-#include "MiscSorts.h"
-#include "QuickSorts.h"
+#include "SortHelpers.hpp"
+#include "ExchangeSorts.hpp"
+#include "SelectSorts.hpp"
+#include "InsertSorts.hpp"
+#include "MergeSorts.hpp"
+#include "DistributeSorts.hpp"
+#include "HybridSorts.hpp"
+#include "ConcurrentSorts.hpp"
+#include "MiscSorts.hpp"
+#include "QuickSorts.hpp"
 
 namespace NVisualSort {
 
-	// ¶ÔÊı¾İÁ¿µÄÔ¼Êø
+	// å¯¹æ•°æ®é‡çš„çº¦æŸ
 	class NumRequire {
 
 	private:
 
-		std::wstring m_requireInform; // Ô¼ÊøĞÅÏ¢
-		std::function<bool(size_t)> m_checkFunc; // Ğ£Ñéº¯Êı£¨Ğ£ÑéÊ§°Ü·µ»Øfalse£©
+		std::wstring m_requireInform; // çº¦æŸä¿¡æ¯
+		std::function<bool(size_t)> m_checkFunc; // æ ¡éªŒå‡½æ•°ï¼ˆæ ¡éªŒå¤±è´¥è¿”å›falseï¼‰
 
 	public:
 
-		NumRequire() : m_requireInform(L"ÎŞÔ¼Êø"), m_checkFunc([](size_t) { return true; }) {}
+		NumRequire() : m_requireInform(L"æ— çº¦æŸ"), m_checkFunc([](size_t) { return true; }) {}
 		NumRequire(std::wstring inform, std::function<bool(size_t)> checkFunc)
 			: m_requireInform(std::move(inform)), m_checkFunc(std::move(checkFunc)) {
 		}
@@ -89,15 +60,15 @@ namespace NVisualSort {
 
 	private:
 
-		std::wstring m_sortName; // ÅÅĞòÃû³Æ
-		int m_maxSize = 0; // ÅÅĞò×î´óÊı¾İÁ¿
-		std::function<void(std::vector<int>&)> m_intSortFunc; // int ÅÅĞòfuncÊµÀı
+		std::wstring m_sortName; // æ’åºåç§°
+		int m_maxSize = 0; // æ’åºæœ€å¤§æ•°æ®é‡
+		std::function<void(std::vector<int>&)> m_intSortFunc; // int æ’åºfuncå®ä¾‹
 		std::function<void(std::vector<Counter>&)> m_counterSortFunc;
 		std::function<void(std::vector<Strip>&)> m_stripSortFunc;
 
 		std::vector<NumRequire> m_numRequires;
-		bool m_isUnpredictable = false; // Ëã·¨ÊÇ·ñ²»¿ÉÔ¤²â£¨²»¿ÉÔ¤²âÈçºï×ÓÅÅĞò£¬Ë¯ÃßÅÅĞò£©
-		bool m_isMulThread = false; // Ëã·¨ÊÇ·ñÎª¶àÏß³Ì
+		bool m_isUnpredictable = false; // ç®—æ³•æ˜¯å¦ä¸å¯é¢„æµ‹ï¼ˆä¸å¯é¢„æµ‹å¦‚çŒ´å­æ’åºï¼Œç¡çœ æ’åºï¼‰
+		bool m_isMulThread = false; // ç®—æ³•æ˜¯å¦ä¸ºå¤šçº¿ç¨‹
 
 	public:
 
@@ -186,7 +157,7 @@ namespace NVisualSort {
 
 		template<typename T> requires
 			(std::same_as<T, int> || std::same_as<T, Counter> || std::same_as<T, Strip>)
-		void RunSort(std::vector<T>& data_) {
+			void RunSort(std::vector<T>& data_) {
 			if constexpr (std::is_same_v<T, int>) {
 				this->m_intSortFunc(data_);
 			}
@@ -200,10 +171,9 @@ namespace NVisualSort {
 
 	};
 
-	// ÅÅĞòËã·¨ÊµÏÖ£¨ÕâĞ©Ëã·¨Ö»¿¼ÂÇÁË int,Counter,Strip ×÷ÎªÔªËØÀàĞÍµÄÇé¿ö£¬Çë½÷É÷ÔÚ±ğµÄÏîÄ¿Ê¹ÓÃ£©
 	namespace NSortAlgorithms {
 
-		// ºï×ÓÅÅĞò×¨ÓÃ³õÊ¼Ëæ»úÊıÀà£¬±£Ö¤ÕæÊµÅÅĞòÊ±¼ä¼ÆËãÕıÈ·¡£
+		// çŒ´å­æ’åºä¸“ç”¨åˆå§‹éšæœºæ•°ç±»ï¼Œä¿è¯çœŸå®æ’åºæ—¶é—´è®¡ç®—æ­£ç¡®ã€‚
 		class BogoSortRandomEngine {
 		private:
 			inline static std::atomic<bool> s_isIntUsed = false;
@@ -230,7 +200,7 @@ namespace NVisualSort {
 				return s_randomNumber;
 			}
 		};
-		// ºï×ÓÅÅĞò
+		// çŒ´å­æ’åº
 		template<class T = int> void BogoSort(std::vector<T>& data_) {
 			if (data_.size() < 2) {
 				return;
@@ -251,16 +221,16 @@ namespace NVisualSort {
 					return;
 				}
 			}
-			throw WideError(L"ºï×ÓÅÅĞò³¬Ê±£¡");
+			throw WideError(L"çŒ´å­æ’åºè¶…æ—¶ï¼");
 		}
 
-		// ³ôÆ¤½³ÅÅĞò
+		// è‡­çš®åŒ æ’åº
 		template<class T = int> void StoogeSort(std::vector<T>& data_) {
 			if (data_.size() < 2) {
 				return;
 			}
 
-			// Ê¹ÓÃÕ»À´Ä£Äâµİ¹éµ÷ÓÃ
+			// ä½¿ç”¨æ ˆæ¥æ¨¡æ‹Ÿé€’å½’è°ƒç”¨
 			std::stack<std::pair<ptrdiff_t, ptrdiff_t>> localStack;
 			localStack.push(std::make_pair(static_cast<ptrdiff_t>(0), static_cast<ptrdiff_t>(data_.size() - 1)));
 
@@ -274,26 +244,26 @@ namespace NVisualSort {
 				if (data_[i] > data_[j]) {
 					std::swap(data_[i], data_[j]);
 				}
-				// Èç¹û×ÓÊı×éÓĞ3¸ö»ò¸ü¶àÔªËØ£¬¼ÌĞø·Ö¸î
+				// å¦‚æœå­æ•°ç»„æœ‰3ä¸ªæˆ–æ›´å¤šå…ƒç´ ï¼Œç»§ç»­åˆ†å‰²
 				if (j - i > 1) {
 					ptrdiff_t k = (j - i + 1) / 3;
-					// ½«Èı¸ö×ÓÊı×é°´Ïà·´Ë³ĞòÑ¹ÈëÕ»£¨ÒòÎªÊÇLIFO£©
-					// ÕâÑù´¦ÀíË³Ğò»áÊÇ£ºÏÈ´¦ÀíµÚÒ»²¿·Ö£¬È»ºóµÚ¶ş²¿·Ö£¬È»ºóÔÙ´ÎµÚÒ»²¿·Ö
-					localStack.push(std::make_pair(i, j - k));// µÚÒ»´Î´¦ÀíµÚÒ»²¿·Ö
-					localStack.push(std::make_pair(i + k, j));// ´¦ÀíµÚ¶ş²¿·Ö
-					localStack.push(std::make_pair(i, j - k));// µÚ¶ş´Î´¦ÀíµÚÒ»²¿·Ö
+					// å°†ä¸‰ä¸ªå­æ•°ç»„æŒ‰ç›¸åé¡ºåºå‹å…¥æ ˆï¼ˆå› ä¸ºæ˜¯LIFOï¼‰
+					// è¿™æ ·å¤„ç†é¡ºåºä¼šæ˜¯ï¼šå…ˆå¤„ç†ç¬¬ä¸€éƒ¨åˆ†ï¼Œç„¶åç¬¬äºŒéƒ¨åˆ†ï¼Œç„¶åå†æ¬¡ç¬¬ä¸€éƒ¨åˆ†
+					localStack.push(std::make_pair(i, j - k));// ç¬¬ä¸€æ¬¡å¤„ç†ç¬¬ä¸€éƒ¨åˆ†
+					localStack.push(std::make_pair(i + k, j));// å¤„ç†ç¬¬äºŒéƒ¨åˆ†
+					localStack.push(std::make_pair(i, j - k));// ç¬¬äºŒæ¬¡å¤„ç†ç¬¬ä¸€éƒ¨åˆ†
 				}
 			}
 		}
 
-		// Ë¯ÃßÅÅĞò£¨Ë¯ÃßµÄÊ±¼ä¸¡¶¯ÇÒ²»¿ÉÔ¤²â£¬ËùÒÔÅÅĞòÊ±¼äµÄÏÔÊ¾²»¿É¿¿£©
+		// ç¡çœ æ’åºï¼ˆç¡çœ çš„æ—¶é—´æµ®åŠ¨ä¸”ä¸å¯é¢„æµ‹ï¼Œæ‰€ä»¥æ’åºæ—¶é—´çš„æ˜¾ç¤ºä¸å¯é ï¼‰
 		template<class T = int> void SleepSort(std::vector<T>& data_) {
 			if (data_.size() < 2) {
 				return;
 			}
 
 			if (data_.size() > 300) {
-				throw WideError(L"Ë¯ÃßÅÅĞòÊı¾İÁ¿¹ı´ó£¬¿ÉÄÜ»áµ¼ÖÂÕ»Òç³ö£¡");
+				throw WideError(L"ç¡çœ æ’åºæ•°æ®é‡è¿‡å¤§ï¼Œå¯èƒ½ä¼šå¯¼è‡´æ ˆæº¢å‡ºï¼");
 			}
 
 			ptrdiff_t dataSize = data_.size();
@@ -308,7 +278,7 @@ namespace NVisualSort {
 				return;
 			}
 			else if (rangeSize > 100000) {
-				throw WideError(L"¸ÃÊı¾İ×îĞ¡ÖµÓë×î´óÖµ²î¾à¹ı´ó£¬²»½¨ÒéÊ¹ÓÃË¯ÃßÅÅĞò£¡");
+				throw WideError(L"è¯¥æ•°æ®æœ€å°å€¼ä¸æœ€å¤§å€¼å·®è·è¿‡å¤§ï¼Œä¸å»ºè®®ä½¿ç”¨ç¡çœ æ’åºï¼");
 			}
 
 			std::promise<void> startPromise;
@@ -316,16 +286,16 @@ namespace NVisualSort {
 
 			std::vector<std::thread> workers;
 			std::atomic<ptrdiff_t> workerOKNum = 0;
-			std::mutex resultMutex;  // ±£»¤½á¹ûÊı×éµÄĞ´Èë
+			std::mutex resultMutex;  // ä¿æŠ¤ç»“æœæ•°ç»„çš„å†™å…¥
 
 			for (size_t i = 0; i < data_.size(); ++i) {
 				long long sleepTime = static_cast<long long>(data_[i]) - minValue;
 
 				workers.emplace_back([startPuture, sleepTime, minValue, &data_, &workerOKNum, &resultMutex]() {
-					// ËùÓĞÏß³ÌÍ¬Ê±¿ªÊ¼µÈ´ıĞÅºÅ
-					startPuture.wait();  // ÕâÀïÃ»ÓĞËø£¬ËùÓĞÏß³Ì²¢ĞĞµÈ´ı
+					// æ‰€æœ‰çº¿ç¨‹åŒæ—¶å¼€å§‹ç­‰å¾…ä¿¡å·
+					startPuture.wait();  // è¿™é‡Œæ²¡æœ‰é”ï¼Œæ‰€æœ‰çº¿ç¨‹å¹¶è¡Œç­‰å¾…
 
-					// ²¢ĞĞË¯Ãß
+					// å¹¶è¡Œç¡çœ 
 					if constexpr (std::is_same_v<T, Strip>) {
 						std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime * 100));
 						AnimationStepNum += 1000;
@@ -337,13 +307,13 @@ namespace NVisualSort {
 						ActualStepNum += 1000;
 					}
 
-					// ½«½á¹û·ÅÈë½á¹ûÊı×é£¨ĞèÒª±£»¤£¬ÒòÎª¶à¸öÏß³Ì¿ÉÄÜÍ¬Ê±ĞÑÀ´£©
+					// å°†ç»“æœæ”¾å…¥ç»“æœæ•°ç»„ï¼ˆéœ€è¦ä¿æŠ¤ï¼Œå› ä¸ºå¤šä¸ªçº¿ç¨‹å¯èƒ½åŒæ—¶é†’æ¥ï¼‰
 					std::lock_guard<std::mutex> lock(resultMutex);
 					data_[workerOKNum++] = static_cast<int>(sleepTime + minValue);
-				});
+					});
 			}
 
-			// ×¢Òâ£ºÕâÀïĞèÒª¸øÏß³ÌÒ»µãÊ±¼äÆô¶¯£¬·ñÔò¿ÉÄÜÓĞĞ©Ïß³Ì»¹Ã»¿ªÊ¼µÈ´ı
+			// æ³¨æ„ï¼šè¿™é‡Œéœ€è¦ç»™çº¿ç¨‹ä¸€ç‚¹æ—¶é—´å¯åŠ¨ï¼Œå¦åˆ™å¯èƒ½æœ‰äº›çº¿ç¨‹è¿˜æ²¡å¼€å§‹ç­‰å¾…
 			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 			startPromise.set_value();
 
@@ -352,7 +322,7 @@ namespace NVisualSort {
 					worker.join();
 				}
 				else {
-					throw WideError(L"Ë¯ÃßÅÅĞò³ö´í£º´æÔÚÎŞ·¨»Ø¹éµÄÏß³Ì£¡");
+					throw WideError(L"ç¡çœ æ’åºå‡ºé”™ï¼šå­˜åœ¨æ— æ³•å›å½’çš„çº¿ç¨‹ï¼");
 				}
 			}
 
@@ -367,7 +337,7 @@ namespace NVisualSort {
 			}
 		}
 
-		// Ñ­»·ÅÅĞò
+		// å¾ªç¯æ’åº
 		template<class T = int> void CycleSort(std::vector<T>& data_) {
 			if (data_.size() < 2) {
 				return;
@@ -375,39 +345,39 @@ namespace NVisualSort {
 			ptrdiff_t dataSize = static_cast<ptrdiff_t>(data_.size());
 			for (ptrdiff_t cycleStart = 0; cycleStart < dataSize - 1; ++cycleStart) {
 				T item(data_[cycleStart]);
-				// Ñ°ÕÒ item Ó¦¸Ã·ÅÖÃµÄÎ»ÖÃ
+				// å¯»æ‰¾ item åº”è¯¥æ”¾ç½®çš„ä½ç½®
 				ptrdiff_t itemPosition = cycleStart;
 				for (ptrdiff_t i = cycleStart + 1; i < dataSize; ++i) {
 					if (data_[i] < item) {
 						++itemPosition;
 					}
 				}
-				// Èç¹û item ÒÑ¾­ÔÚÕıÈ·Î»ÖÃ£¬¼ÌĞøÏÂÒ»¸öÑ­»·
+				// å¦‚æœ item å·²ç»åœ¨æ­£ç¡®ä½ç½®ï¼Œç»§ç»­ä¸‹ä¸€ä¸ªå¾ªç¯
 				if (itemPosition == cycleStart) {
 					continue;
 				}
-				// Ìø¹ıÏàµÈµÄÔªËØ
+				// è·³è¿‡ç›¸ç­‰çš„å…ƒç´ 
 				while (item == data_[itemPosition]) {
 					++itemPosition;
 				}
-				// Èç¹ûÕÒµ½ÁË²»Í¬ÔªËØ£¬½»»»
+				// å¦‚æœæ‰¾åˆ°äº†ä¸åŒå…ƒç´ ï¼Œäº¤æ¢
 				if (itemPosition != cycleStart) {
 					std::swap(item, data_[itemPosition]);
 				}
-				// ¼ÌĞøĞı×ªÊ£ÓàµÄÑ­»·
+				// ç»§ç»­æ—‹è½¬å‰©ä½™çš„å¾ªç¯
 				while (itemPosition != cycleStart) {
 					itemPosition = cycleStart;
-					// Îªµ±Ç° item Ñ°ÕÒÕıÈ·Î»ÖÃ
+					// ä¸ºå½“å‰ item å¯»æ‰¾æ­£ç¡®ä½ç½®
 					for (ptrdiff_t i = cycleStart + 1; i < dataSize; ++i) {
 						if (data_[i] < item) {
 							++itemPosition;
 						}
 					}
-					// Ìø¹ıÏàµÈµÄÔªËØ
+					// è·³è¿‡ç›¸ç­‰çš„å…ƒç´ 
 					while (item == data_[itemPosition]) {
 						++itemPosition;
 					}
-					// ½»»»Ö±µ½ item »Øµ½Ô­Ê¼Î»ÖÃ
+					// äº¤æ¢ç›´åˆ° item å›åˆ°åŸå§‹ä½ç½®
 					if (item != data_[itemPosition]) {
 						std::swap(item, data_[itemPosition]);
 					}
@@ -415,7 +385,7 @@ namespace NVisualSort {
 			}
 		}
 
-		// Ã°ÅİÀÏ×æ
+		// å†’æ³¡è€ç¥–
 		template<class T = int> void BubbleSort(std::vector<T>& data_) {
 			if (data_.size() < 2) {
 				return;
@@ -435,7 +405,7 @@ namespace NVisualSort {
 			}
 		}
 
-		// Ë«ÏòÃ°Åİ
+		// åŒå‘å†’æ³¡
 		template<class T = int> void BidirectionalBubbleSort(std::vector<T>& data_) {
 			if (data_.size() < 2) {
 				return;
@@ -461,7 +431,7 @@ namespace NVisualSort {
 			}
 		}
 
-		// ÆæÅ¼ÅÅĞò
+		// å¥‡å¶æ’åº
 		template<class T = int> void OddEvenSort(std::vector<T>& data_) {
 			if (data_.size() < 2) {
 				return;
@@ -487,7 +457,7 @@ namespace NVisualSort {
 			}
 		}
 
-		// Ñ¡ÔñÅÅĞò
+		// é€‰æ‹©æ’åº
 		template<class T = int> void SelectionSort(std::vector<T>& data_) {
 			if (data_.size() < 2) {
 				return;
@@ -507,7 +477,7 @@ namespace NVisualSort {
 			}
 		}
 
-		// Ë«ÏòÑ¡Ôñ
+		// åŒå‘é€‰æ‹©
 		template<class T = int> void BidirectionalSelectionSort(std::vector<T>& data_) {
 			if (data_.size() < 2) {
 				return;
@@ -541,7 +511,7 @@ namespace NVisualSort {
 			}
 		}
 
-		// ²åÈëÅÅĞò
+		// æ’å…¥æ’åº
 		template<class T = int> void InsertionSort(std::vector<T>& data_) {
 			if (data_.size() < 2) {
 				return;
@@ -558,13 +528,13 @@ namespace NVisualSort {
 			}
 		}
 
-		// ÖéÅÅĞò
+		// ç æ’åº
 		template<class T = int> void BeadSort(std::vector<T>& data_) {
 			if (data_.size() < 2) {
 				return;
 			}
 			if constexpr (std::is_same_v<T, float> || std::is_same_v<T, double>) {
-				throw WideError(L"ÖéÅÅĞò²»Ö§³Ö¸¡µãÊı£¡");
+				throw WideError(L"ç æ’åºä¸æ”¯æŒæµ®ç‚¹æ•°ï¼");
 			}
 			ptrdiff_t dataSize = data_.size();
 			int maxValue = data_[0];
@@ -578,7 +548,7 @@ namespace NVisualSort {
 				return;
 			}
 			else if (rangeSize > 10000000) {
-				throw WideError(L"¸ÃÊı¾İ×îĞ¡ÖµÓë×î´óÖµ²î¾à¹ı´ó£¬²»ÊÊºÏÊ¹ÓÃÖéÅÅĞò£¡");
+				throw WideError(L"è¯¥æ•°æ®æœ€å°å€¼ä¸æœ€å¤§å€¼å·®è·è¿‡å¤§ï¼Œä¸é€‚åˆä½¿ç”¨ç æ’åºï¼");
 			}
 			std::vector<ptrdiff_t> beadQueue(rangeSize, 0);
 			for (ptrdiff_t i = 0; i < dataSize; ++i) {
@@ -610,7 +580,7 @@ namespace NVisualSort {
 			}
 		}
 
-		// ÊáÅÅĞò
+		// æ¢³æ’åº
 		template<class T = int> void CombSort(std::vector<T>& data_) {
 			if (data_.size() < 2) {
 				return;
@@ -642,14 +612,14 @@ namespace NVisualSort {
 			}
 		}
 
-		// Ï£¶ûÅÅĞò
+		// å¸Œå°”æ’åº
 		template<class T = int> void ShellSort(std::vector<T>& data_) {
 			if (data_.size() < 2) {
 				return;
 			}
 			ptrdiff_t dataSize = static_cast<ptrdiff_t>(data_.size());
 
-			// Ê¹ÓÃ Ciura ÔöÁ¿ĞòÁĞ
+			// ä½¿ç”¨ Ciura å¢é‡åºåˆ—
 			std::vector<ptrdiff_t> gaps = { 701, 301, 132, 57, 23, 10, 4, 1 };
 
 			for (ptrdiff_t gap : gaps) {
@@ -668,13 +638,13 @@ namespace NVisualSort {
 			}
 		}
 
-		// Ë«µ÷ÅÅĞò
+		// åŒè°ƒæ’åº
 		template<class T = int> void BitonicSort(std::vector<T>& data_) {
 			if (data_.size() < 2) {
 				return;
 			}
 			if ((data_.size() & (data_.size() - 1)) != 0) {
-				throw WideError(L"Ë«µ÷ÅÅĞòÒªÇóÊı¾İÁ¿Îª2µÄ·Ç¸ºÕûÊı´ÎÃİ£¡");
+				throw WideError(L"åŒè°ƒæ’åºè¦æ±‚æ•°æ®é‡ä¸º2çš„éè´Ÿæ•´æ•°æ¬¡å¹‚ï¼");
 			}
 
 			struct Range {
@@ -699,32 +669,32 @@ namespace NVisualSort {
 
 				ptrdiff_t middleIndex = length / 2;
 
-				if (type == false) {  // func1: Ö´ĞĞºÏ²¢
-					// Ö´ĞĞºÏ²¢²Ù×÷
+				if (type == false) {  // func1: æ‰§è¡Œåˆå¹¶
+					// æ‰§è¡Œåˆå¹¶æ“ä½œ
 					for (ptrdiff_t i = 0; i < middleIndex; ++i) {
 						if ((data_[i + position] > data_[i + middleIndex + position]) == ascending) {
 							std::swap(data_[i + position], data_[i + middleIndex + position]);
 						}
 					}
 
-					// µİ¹é´¦Àí×ÓĞòÁĞ
+					// é€’å½’å¤„ç†å­åºåˆ—
 					localStack.push({ position + middleIndex, middleIndex, ascending, false });
 					localStack.push({ position, middleIndex, ascending, false });
 				}
-				else {  // func2: µİ¹é·Ö½â
-					// Ìí¼Ófunc1ºÏ²¢ÈÎÎñ£¨×îºóÖ´ĞĞ£©
+				else {  // func2: é€’å½’åˆ†è§£
+					// æ·»åŠ func1åˆå¹¶ä»»åŠ¡ï¼ˆæœ€åæ‰§è¡Œï¼‰
 					localStack.push({ position, length, ascending, false });
 
-					// Ìí¼ÓÓÒ°ë²¿·ÖÈÎÎñ
+					// æ·»åŠ å³åŠéƒ¨åˆ†ä»»åŠ¡
 					localStack.push({ position + middleIndex, length - middleIndex, ascending, true });
 
-					// Ìí¼Ó×ó°ë²¿·ÖÈÎÎñ£¨asdÈ¡·´£©
+					// æ·»åŠ å·¦åŠéƒ¨åˆ†ä»»åŠ¡ï¼ˆasdå–åï¼‰
 					localStack.push({ position, middleIndex, !ascending, true });
 				}
 			}
 		}
 
-		// ¹é²¢ÅÅĞò
+		// å½’å¹¶æ’åº
 		template<class T = int> void MergeSort(std::vector<T>& data_) {
 			if (data_.size() < 2) {
 				return;
@@ -755,15 +725,15 @@ namespace NVisualSort {
 				ptrdiff_t middleIndex = leftIndex + (rightIndex - leftIndex) / 2;
 
 				if (!isProcessed) {
-					// µÚÒ»´Î·ÃÎÊ£ºĞèÒªÏÈ´¦Àí×ÓÎÊÌâ
-					// Ñ¹Èëµ±Ç°ÈÎÎñ£¨±ê¼ÇÎªÒÑ´¦Àí£©
+					// ç¬¬ä¸€æ¬¡è®¿é—®ï¼šéœ€è¦å…ˆå¤„ç†å­é—®é¢˜
+					// å‹å…¥å½“å‰ä»»åŠ¡ï¼ˆæ ‡è®°ä¸ºå·²å¤„ç†ï¼‰
 					localStack.push_back({ leftIndex, rightIndex, true });
-					// Ñ¹ÈëÓÒ×ÓÈÎÎñ
+					// å‹å…¥å³å­ä»»åŠ¡
 					localStack.push_back({ middleIndex + 1, rightIndex, false });
-					// Ñ¹Èë×ó×ÓÈÎÎñ
+					// å‹å…¥å·¦å­ä»»åŠ¡
 					localStack.push_back({ leftIndex, middleIndex, false });
 				}
-				// µÚ¶ş´Î·ÃÎÊ£¬×ÓÎÊÌâÒÑ´¦Àí£¬¿ªÊ¼ºÏ²¢
+				// ç¬¬äºŒæ¬¡è®¿é—®ï¼Œå­é—®é¢˜å·²å¤„ç†ï¼Œå¼€å§‹åˆå¹¶
 				else {
 					for (ptrdiff_t i = leftIndex; i <= middleIndex; ++i) {
 						dataQueue[i - leftIndex] = data_[i];
@@ -787,7 +757,7 @@ namespace NVisualSort {
 			}
 		}
 
-		// ¶ÑÅÅĞò
+		// å †æ’åº
 		template<class T = int> void HeapSort(std::vector<T>& data_) {
 			if (data_.size() < 2) {
 				return;
@@ -853,7 +823,7 @@ namespace NVisualSort {
 			}
 		}
 
-		// ¿ìËÙÅÅĞò
+		// å¿«é€Ÿæ’åº
 		template<class T = int> void QuickSort(std::vector<T>& data_) {
 			if (data_.size() < 2) {
 				return;
@@ -886,7 +856,7 @@ namespace NVisualSort {
 
 				std::swap(data_[i], data_[leftIndex]);
 
-				// ½«×ÓÇø¼äÑ¹ÈëÕ»ÖĞ£¬ÏÈ´¦Àí½Ï´óµÄÇø¼äÒÔ¼õÉÙÕ»Éî¶È
+				// å°†å­åŒºé—´å‹å…¥æ ˆä¸­ï¼Œå…ˆå¤„ç†è¾ƒå¤§çš„åŒºé—´ä»¥å‡å°‘æ ˆæ·±åº¦
 				if (i - leftIndex < rightIndex - i) {
 					localStack.push(std::make_pair(i + 1, rightIndex));
 					localStack.push(std::make_pair(leftIndex, i - 1));
@@ -898,18 +868,18 @@ namespace NVisualSort {
 			}
 		}
 
-		// »ùÊıÅÅĞò¸øÍ°È¾É«ÓÃµÄ£¬¿ÉÒÔËæÒâĞŞ¸ÄÑÕÉ«£¨ÖÁÉÙÒªÓĞÒ»¸öÑÕÉ«£©
+		// åŸºæ•°æ’åºç»™æ¡¶æŸ“è‰²ç”¨çš„ï¼Œå¯ä»¥éšæ„ä¿®æ”¹é¢œè‰²ï¼ˆè‡³å°‘è¦æœ‰ä¸€ä¸ªé¢œè‰²ï¼‰
 		inline std::vector<COLORREF> RadixSortBucketColor = {
 			BLUE,MAGENTA,CYAN,RED,BROWN,YELLOW,GREEN,WHITE,BLACK,
 			LIGHTBLUE,LIGHTGREEN,LIGHTCYAN,LIGHTRED,LIGHTMAGENTA
 		};
-		// »ùÊıÅÅĞò
+		// åŸºæ•°æ’åº
 		template<class T = int> void RadixSort(std::vector<T>& data_) {
 			if (data_.size() < 2) {
 				return;
 			}
 			if constexpr (std::is_same_v<T, float> || std::is_same_v<T, double>) {
-				throw WideError(L"»ùÊıÅÅĞò²»Ö§³Ö¸¡µãÊı£¡");
+				throw WideError(L"åŸºæ•°æ’åºä¸æ”¯æŒæµ®ç‚¹æ•°ï¼");
 			}
 			ptrdiff_t dataSize = static_cast<ptrdiff_t>(data_.size());
 			int maxValue = data_[0];
@@ -999,13 +969,13 @@ namespace NVisualSort {
 			}
 		}
 
-		// ¼ÆÊıÅÅĞò
+		// è®¡æ•°æ’åº
 		template<class T = int> void CountingSort(std::vector<T>& data_) {
 			if (data_.size() < 2) {
 				return;
 			}
 			if constexpr (std::is_same_v<T, float> || std::is_same_v<T, double>) {
-				throw WideError(L"¼ÆÊıÅÅĞò²»Ö§³Ö¸¡µãÊı£¡");
+				throw WideError(L"è®¡æ•°æ’åºä¸æ”¯æŒæµ®ç‚¹æ•°ï¼");
 			}
 			ptrdiff_t dataSize = static_cast<ptrdiff_t>(data_.size());
 			int maxValue = data_[0];
@@ -1019,7 +989,7 @@ namespace NVisualSort {
 				return;
 			}
 			if (rangeSize > 10000000) {
-				throw WideError(L"¸ÃÊı¾İ×îĞ¡ÖµÓë×î´óÖµ²î¾à¹ı´ó£¬²»ÊÊºÏÊ¹ÓÃ¼ÆÊıÅÅĞò£¡");
+				throw WideError(L"è¯¥æ•°æ®æœ€å°å€¼ä¸æœ€å¤§å€¼å·®è·è¿‡å¤§ï¼Œä¸é€‚åˆä½¿ç”¨è®¡æ•°æ’åºï¼");
 			}
 			std::vector<int> countQueue(rangeSize, 0);
 			for (ptrdiff_t i = 0; i < dataSize; ++i) {
@@ -1034,7 +1004,7 @@ namespace NVisualSort {
 			}
 		}
 
-		// C++±ê×¼¿âÅÅĞò
+		// C++æ ‡å‡†åº“æ’åº
 		template<class T = int> void StdSort(std::vector<T>& data_) {
 			if (data_.size() < 2) {
 				return;
@@ -1042,7 +1012,7 @@ namespace NVisualSort {
 			std::sort(data_.begin(), data_.end());
 		}
 
-		// C++±ê×¼¿â ÎÈ¶¨ÅÅĞò
+		// C++æ ‡å‡†åº“ ç¨³å®šæ’åº
 		template<class T = int> void StdStableSort(std::vector<T>& data_) {
 			if (data_.size() < 2) {
 				return;
@@ -1050,7 +1020,7 @@ namespace NVisualSort {
 			std::stable_sort(data_.begin(), data_.end());
 		}
 
-		// C++±ê×¼¿â ½¨¶Ñ + ¶ÑÅÅĞò
+		// C++æ ‡å‡†åº“ å»ºå † + å †æ’åº
 		template<class T = int> void StdHeapSort(std::vector<T>& data_) {
 			if (data_.size() < 2) {
 				return;
@@ -1059,7 +1029,7 @@ namespace NVisualSort {
 			std::sort_heap(data_.begin(), data_.end());
 		}
 
-		// C++±ê×¼¿â Partial ÅÅĞò
+		// C++æ ‡å‡†åº“ Partial æ’åº
 		template<class T = int> void StdPartialSort(std::vector<T>& data_) {
 			if (data_.size() < 2) {
 				return;
@@ -1067,7 +1037,7 @@ namespace NVisualSort {
 			std::partial_sort(data_.begin(), data_.end(), data_.end());
 		}
 
-		// C++±ê×¼¿âÅÅĞò£¨²¢ĞĞ£¬Ïß³Ì³ØÉè¼Æµ¼ÖÂ Strip::st_scopeGuard ÔÚ³ÌĞò½áÊøÊ±²ÅÈ«²¿Îö¹¹£¬Strip ÑÕÉ«²ĞÁô£©
+		// C++æ ‡å‡†åº“æ’åºï¼ˆå¹¶è¡Œï¼Œçº¿ç¨‹æ± è®¾è®¡å¯¼è‡´ Strip::st_scopeGuard åœ¨ç¨‹åºç»“æŸæ—¶æ‰å…¨éƒ¨ææ„ï¼ŒStrip é¢œè‰²æ®‹ç•™ï¼‰
 		template<class T = int> void StdSort_Parallel(std::vector<T>& data_) {
 			if (data_.size() < 2) {
 				return;

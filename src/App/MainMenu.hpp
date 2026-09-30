@@ -1,11 +1,9 @@
 #pragma once
-#include "VisualSort.h"
-#include "InputBox.h"
-#include "Button.h"
-#include "ConfigManager.h"
-#include "DrawingTool.h"
-#include "Dialog.h"
-#include "Sketch.h"
+#include "VisualSort.hpp"
+#include "InputBox.hpp"
+#include "Button.hpp"
+#include "ConfigManager.hpp"
+#include "DrawingTool.hpp"
 #include <Windows.h>
 #include <easyx.h>
 #include <algorithm>
@@ -13,9 +11,9 @@
 #include <string>
 #include <thread>
 #include <vector>
-#include "Fraction.h"
-#include "WideError.h"
-#include "Coordinate.h"
+#include "Fraction.hpp"
+#include "WideError.hpp"
+#include "Coordinate.hpp"
 #include <memory>
 #pragma comment(lib, "winmm.lib")
 
@@ -25,23 +23,36 @@ namespace NVisualSort {
 
 	private:
 
-		bool m_fullScreen = true; // ÊÇ·ñÈ«ÆÁÏÔÊ¾
-		std::shared_ptr<std::thread> m_getMessageThreadPtr; // (»ñÈ¡Êó±êÏûÏ¢)µÄÏß³ÌÖ¸Õë
+		bool m_fullScreen = true; // æ˜¯å¦å…¨å±æ˜¾ç¤º
+
+		void SetStyleAuto() const {
+			::setbkcolor(GetConfigManager().GetCanvasColor());
+			::setbkmode(TRANSPARENT);
+			LOGFONT logFont = {};
+			::gettextstyle(&logFont);
+			logFont.lfQuality = ANTIALIASED_QUALITY;
+			::settextstyle(&logFont);
+			HWND hwnd = GetHWnd();
+			SetWindowText(hwnd, L"ä½ çœ‹ï¼Œå®ƒä»¬åƒæŸ±å­ä¸€æ ·");
+			BeginBatchDraw();
+			GetDrawingTool().ClearDevice();
+			GetDrawingTool().FlushBatchDraw();
+		}
 
 		MainMenu() {
 			DEVMODE devMode = {};
 			EnumDisplaySettings(nullptr, ENUM_CURRENT_SETTINGS, &devMode);
-			GetConfigManager().SetWidth(devMode.dmPelsWidth); // ÉèÖÃ´°¿Ú¿í¶È
-			GetConfigManager().SetHeight(devMode.dmPelsHeight); // ÉèÖÃ´°¿Ú¸ß¶È
-			::initgraph(GetConfigManager().GetWidth(), GetConfigManager().GetHeight(), EX_NOCLOSE | EX_NOMINIMIZE); // ´´½¨´°¿Ú
+			GetConfigManager().SetWidth(devMode.dmPelsWidth); // è®¾ç½®çª—å£å®½åº¦
+			GetConfigManager().SetHeight(devMode.dmPelsHeight); // è®¾ç½®çª—å£é«˜åº¦
+			::initgraph(GetConfigManager().GetWidth(), GetConfigManager().GetHeight(), EX_NOCLOSE | EX_NOMINIMIZE); // åˆ›å»ºçª—å£
 			HWND hwnd = GetHWnd();
 			LONG_PTR style = GetWindowLongPtr(hwnd, GWL_STYLE);
 			style &= ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU);
-			SetWindowLongPtr(hwnd, GWL_STYLE, style); // Ó¦ÓÃ´°¿Ú·ç¸ñ£¨ÎŞ±ß¿ò¡¢ÎŞ±êÌâÀ¸µÈµÈ£©
-			this->SetStyleAuto(); // ×Ô¶¯ÉèÖÃÒ»Ğ©·ç¸ñ£¨±ÈÈçÎÄ×Ö¿¹¾â³İµÈµÈ£©
-			::timeBeginPeriod(1); // ÏòÏµÍ³ÇëÇóÌá¸ß¶¨Ê±Æ÷µÄ·Ö±æÂÊ
-			this->m_getMessageThreadPtr = std::make_shared<std::thread>(ButtonSequence::GetMessageLoop); // ¿ªÊ¼»ñÈ¡Êó±êÏûÏ¢
-			this->RunMainMenu(); // ½øÈëÖ÷²Ëµ¥
+			SetWindowLongPtr(hwnd, GWL_STYLE, style); // åº”ç”¨çª—å£é£æ ¼ï¼ˆæ— è¾¹æ¡†ã€æ— æ ‡é¢˜æ ç­‰ç­‰ï¼‰
+			this->SetStyleAuto(); // è‡ªåŠ¨è®¾ç½®ä¸€äº›é£æ ¼ï¼ˆæ¯”å¦‚æ–‡å­—æŠ—é”¯é½¿ç­‰ç­‰ï¼‰
+			::timeBeginPeriod(1); // å‘ç³»ç»Ÿè¯·æ±‚æé«˜å®šæ—¶å™¨çš„åˆ†è¾¨ç‡
+			MouseMessageSource::GetInstance().Start();
+			this->RunMainMenu(); // è¿›å…¥ä¸»èœå•
 		}
 
 		MainMenu(const MainMenu&) = delete;
@@ -56,8 +67,8 @@ namespace NVisualSort {
 		}
 
 		void FullScreen() const {
-			if (this->m_getMessageThreadPtr->joinable()) {
-				throw WideError(L"»ñÈ¡Êó±êÏûÏ¢µÄÏß³Ì´¦ÓÚ¹¤×÷×´Ì¬£¬Ö±½Ó¸Ä±ä´°¿Ú´óĞ¡»áµ¼ÖÂËÀËø");
+			if (MouseMessageSource::GetInstance().IsRunning()) {
+				throw WideError(L"è·å–é¼ æ ‡æ¶ˆæ¯çš„çº¿ç¨‹å¤„äºå·¥ä½œçŠ¶æ€ï¼Œç›´æ¥æ”¹å˜çª—å£å¤§å°ä¼šå¯¼è‡´æ­»é”");
 			}
 			::EndBatchDraw();
 			::closegraph();
@@ -73,60 +84,42 @@ namespace NVisualSort {
 			this->SetStyleAuto();
 		}
 
-		void SetStyleAuto() const {
-			::setbkcolor(GetConfigManager().GetCanvasColor());
-			::setbkmode(TRANSPARENT);
-			LOGFONT logFont = {};
-			::gettextstyle(&logFont);
-			logFont.lfQuality = ANTIALIASED_QUALITY;
-			::settextstyle(&logFont);
-			HWND hwnd = GetHWnd();
-			SetWindowText(hwnd, L"Äã¿´£¬ËüÃÇÏñÖù×ÓÒ»Ñù");
-			BeginBatchDraw();
-			GetDrawingTool().ClearDevice();
-			GetDrawingTool().FlushBatchDraw();
-		}
-
 		void MaxWindow() const {
-			if (this->m_getMessageThreadPtr->joinable()) {
-				throw WideError(L"»ñÈ¡Êó±êÏûÏ¢µÄÏß³Ì´¦ÓÚ¹¤×÷×´Ì¬£¬Ö±½Ó¸Ä±ä´°¿Ú´óĞ¡»áµ¼ÖÂËÀËø");
+			if (MouseMessageSource::GetInstance().IsRunning()) {
+				throw WideError(L"è·å–é¼ æ ‡æ¶ˆæ¯çš„çº¿ç¨‹å¤„äºå·¥ä½œçŠ¶æ€ï¼Œç›´æ¥æ”¹å˜çª—å£å¤§å°ä¼šå¯¼è‡´æ­»é”");
 			}
-			
 			GetConfigManager().SetDimensions(GetConfigManager().GetMaxWidth(), GetConfigManager().GetMaxClientHeight());
-
 			::closegraph();
-
 			::initgraph(GetConfigManager().GetMaxWidth(), GetConfigManager().GetHeight(), EX_NOCLOSE | EX_NOMINIMIZE);
-
 			this->SetStyleAuto();
 		}
 
 		void ResizeWindow() const {
-			if (this->m_getMessageThreadPtr->joinable()) {
-				throw WideError(L"»ñÈ¡Êó±êÏûÏ¢µÄÏß³Ì´¦ÓÚ¹¤×÷×´Ì¬£¬Ö±½Ó¸Ä±ä´°¿Ú´óĞ¡»áµ¼ÖÂËÀËø");
+			if (MouseMessageSource::GetInstance().IsRunning()) {
+				throw WideError(L"è·å–é¼ æ ‡æ¶ˆæ¯çš„çº¿ç¨‹å¤„äºå·¥ä½œçŠ¶æ€ï¼Œç›´æ¥æ”¹å˜çª—å£å¤§å°ä¼šå¯¼è‡´æ­»é”");
 			}
 			::closegraph();
 			::initgraph(GetConfigManager().GetWidth(), GetConfigManager().GetHeight(), EX_NOCLOSE | EX_NOMINIMIZE);
 			this->SetStyleAuto();
 		}
-		
+
 		void RunMainMenu() {
-			using F = Fraction; // ·ÖÊıÀà£¬±£Ö¤ÕûÊı³ı·¨Ê±µÄ¾«¶È
+			using F = Fraction; // åˆ†æ•°ç±»ï¼Œä¿è¯æ•´æ•°é™¤æ³•æ—¶çš„ç²¾åº¦
 			while (true) {
 				Sketch titleSketch(ComputeRect(GetConfigManager().GetCanvasRect(),
-					F(1, 8), F(1, 10), F(7, 8), F(3, 10)), L"ÅÅĞò¿ÉÊÓ»¯"); // ±êÌâÉèÖÃ
+					F(1, 8), F(1, 10), F(7, 8), F(3, 10)), L"æ’åºå¯è§†åŒ–"); // æ ‡é¢˜è®¾ç½®
 				titleSketch.SetHasFrame(false).SetHasBackground(false);
 				Sketch WuYou(ComputeRect(GetConfigManager().GetCanvasRect(),
-					F(281, 336), F(20, 21), F(1), F(1)), L"by ÎŞÓÇyeah");
+					F(281, 336), F(20, 21), F(1), F(1)), L"by æ— å¿§yeah");
 				WuYou.SetHasFrame(false).SetHasBackground(false).SetTextMode(DT_SINGLELINE | DT_BOTTOM | DT_RIGHT);
-				static ButtonSequence buttons(3); // Èı¸ö°´Å¥£º¿ªÊ¼¡¢ÉèÖÃ¡¢ÍË³ö
-				constexpr F bWidth(3, 16); // °´Å¥¿í¶ÈÕ¼´°¿Ú¿í¶ÈµÄ±ÈÀı
-				constexpr F bHegiht(3, 20); // °´Å¥¸ß¶ÈÕ¼´°¿Ú¸ß¶ÈµÄ±ÈÀı
-				constexpr F vertiGap(1, 20); // °´Å¥ÊúÖ±¼ä¸ôÕ¼´°¿Ú¸ß¶ÈµÄ±ÈÀı
-				constexpr F lMargin(13, 32); // µÚÒ»¸ö°´Å¥Àë´°¿Ú×ó²àµÄ¾àÀëÕ¼´°¿Ú¿í¶ÈµÄ±ÈÀı
-				constexpr F tMargin(7, 20); // µÚÒ»¸ö°´Å¥Àë´°¿ÚÉÏ·½µÄ¾àÀëÕ¼´°¿Ú¸ß¶ÈµÄ±ÈÀı
-				constexpr const wchar_t* texts[] = {L"¿ªÊ¼",L"ÉèÖÃ",L"ÍË³ö"};
-				static std::optional<size_t> choice; // Ñ¡ÔñÁËÄÄ¸ö°´Å¥
+				static ButtonSequence buttons(3); // ä¸‰ä¸ªæŒ‰é’®ï¼šå¼€å§‹ã€è®¾ç½®ã€é€€å‡º
+				constexpr F bWidth(3, 16); // æŒ‰é’®å®½åº¦å çª—å£å®½åº¦çš„æ¯”ä¾‹
+				constexpr F bHegiht(3, 20); // æŒ‰é’®é«˜åº¦å çª—å£é«˜åº¦çš„æ¯”ä¾‹
+				constexpr F vertiGap(1, 20); // æŒ‰é’®ç«–ç›´é—´éš”å çª—å£é«˜åº¦çš„æ¯”ä¾‹
+				constexpr F lMargin(13, 32); // ç¬¬ä¸€ä¸ªæŒ‰é’®ç¦»çª—å£å·¦ä¾§çš„è·ç¦»å çª—å£å®½åº¦çš„æ¯”ä¾‹
+				constexpr F tMargin(7, 20); // ç¬¬ä¸€ä¸ªæŒ‰é’®ç¦»çª—å£ä¸Šæ–¹çš„è·ç¦»å çª—å£é«˜åº¦çš„æ¯”ä¾‹
+				constexpr const wchar_t* texts[] = { L"å¼€å§‹",L"è®¾ç½®",L"é€€å‡º" };
+				static std::optional<size_t> choice; // é€‰æ‹©äº†å“ªä¸ªæŒ‰é’®
 				choice = std::nullopt;
 				for (size_t i = 0; i < buttons.GetButtonNum(); ++i) {
 					buttons.GetButtons()[i].SetButton(ComputeRect(GetConfigManager().GetCanvasRect(),
@@ -136,55 +129,48 @@ namespace NVisualSort {
 							buttons.SetExitFlag(true);
 						}
 					);
-				} // ÉèÖÃÈı¸ö°´Å¥µÄÊôĞÔ
+				} // è®¾ç½®ä¸‰ä¸ªæŒ‰é’®çš„å±æ€§
 				GetDrawingTool().ClearDevice();
 				titleSketch.DrawSketch(false);
 				WuYou.DrawSketch(false);
-				buttons.RunBlockButtonLoop(); // ¿ªÊ¼°´Å¥¼ì²â£¨×èÈû£¬Ö±µ½Ñ¡ÔñÁËÒ»¸ö°´Å¥£©
+				buttons.RunBlockButtonLoop(); // å¼€å§‹æŒ‰é’®æ£€æµ‹ï¼ˆé˜»å¡ï¼Œç›´åˆ°é€‰æ‹©äº†ä¸€ä¸ªæŒ‰é’®ï¼‰
 
 				if (!choice.has_value()) {
-					throw WideError(L"Î´Ñ¡ÔñÈÎºÎÑ¡Ïî");
+					throw WideError(L"æœªé€‰æ‹©ä»»ä½•é€‰é¡¹");
 				}
-				else if (choice.value() == 0) { // Ñ¡ÔñÁËÏÂ±êÎª0µÄ°´Å¥£¨¿ªÊ¼°´Å¥£©
+				else if (choice.value() == 0) { // é€‰æ‹©äº†ä¸‹æ ‡ä¸º0çš„æŒ‰é’®ï¼ˆå¼€å§‹æŒ‰é’®ï¼‰
 					this->RunVisualSortMenu();
 				}
-				else if (choice.value() == 1) { // Ñ¡ÔñÁËÏÂ±êÎª1µÄ°´Å¥£¨ÉèÖÃ°´Å¥£©
+				else if (choice.value() == 1) { // é€‰æ‹©äº†ä¸‹æ ‡ä¸º1çš„æŒ‰é’®ï¼ˆè®¾ç½®æŒ‰é’®ï¼‰
 					this->RunSetMenu();
 				}
-				else if (choice.value() == 2) { // Ñ¡ÔñÁËÏÂ±êÎª2µÄ°´Å¥£¨ÍË³ö°´Å¥£©
-					ButtonSequence::s_exitGetMessage.store(true, std::memory_order_release); // ÉèÖÃÍË³ö±êÖ¾ÎªÕæ
-					PostMessage(GetHWnd(), WM_MOUSEMOVE, 0, MAKELPARAM(100, 100)); // ·¢ËÍÒ»¸öÎŞÒâÒåµÄÊó±êÏûÏ¢£¬ÈÃ»ñÈ¡ÏûÏ¢µÄÏß³ÌĞÑÀ´£¬²¢¼ì²âÒ»´ÎÍË³ö±êÖ¾
-					if (this->m_getMessageThreadPtr->joinable()) {
-						this->m_getMessageThreadPtr->join(); // Ïß³Ì»Ø¹é
-					}
-					else {
-						throw WideError(L"»ñÈ¡Êó±êÏûÏ¢µÄÏß³ÌÎŞ·¨»Ø¹é");
-					}
+				else if (choice.value() == 2) { // é€‰æ‹©äº†ä¸‹æ ‡ä¸º2çš„æŒ‰é’®ï¼ˆé€€å‡ºæŒ‰é’®ï¼‰
+					MouseMessageSource::GetInstance().Stop();
 					return;
 				}
 				else {
-					throw WideError(L"Î´ÖªÑ¡Ïî");
+					throw WideError(L"æœªçŸ¥é€‰é¡¹");
 				}
 			}
 		}
 
 		void RunVisualSortMenu() const {
-			const static size_t sortNum = GetVisualSort().GetSorts().size(); // ×Ü¹²ÓĞ¼¸¸öÅÅĞò
-			const static size_t pageNum = sortNum / 21 + (sortNum % 21 != 0 ? 1 : 0); // ÓĞ¼¸Ò³ÅÅĞò£¨Ò»Ò³×î¶à21¸ö£©
-			static size_t nowPage = 0; // ÏÖÔÚÊÇÄÄÒ»Ò³
-			static ButtonSequence buttons; // °´Å¥ÃÇ£¬°üÀ¨·µ»Ø°´Å¥£¨ºì²æ²æ£©¡¢ÉÏÏÂÒ»Ò³¡¢ÅÅĞò°´Å¥
-			using F = Fraction; // ·ÖÊıÀà
-			static auto DrawPageInform = []() ->void { // ±¾µØº¯Êı£¬»æÖÆÒ³ÊıĞÅÏ¢£¨±ÈÈç 1 / 2 Ò³£©
+			const static size_t sortNum = GetVisualSort().GetSorts().size(); // æ€»å…±æœ‰å‡ ä¸ªæ’åº
+			const static size_t pageNum = sortNum / 21 + (sortNum % 21 != 0 ? 1 : 0); // æœ‰å‡ é¡µæ’åºï¼ˆä¸€é¡µæœ€å¤š21ä¸ªï¼‰
+			static size_t nowPage = 0; // ç°åœ¨æ˜¯å“ªä¸€é¡µ
+			static ButtonSequence buttons; // æŒ‰é’®ä»¬ï¼ŒåŒ…æ‹¬è¿”å›æŒ‰é’®ï¼ˆçº¢å‰å‰ï¼‰ã€ä¸Šä¸‹ä¸€é¡µã€æ’åºæŒ‰é’®
+			using F = Fraction; // åˆ†æ•°ç±»
+			static auto DrawPageInform = []() ->void { // æœ¬åœ°å‡½æ•°ï¼Œç»˜åˆ¶é¡µæ•°ä¿¡æ¯ï¼ˆæ¯”å¦‚ 1 / 2 é¡µï¼‰
 				Sketch pageInform(ComputeRect(GetConfigManager().GetCanvasRect(),
 					F(51, 112), F(20, 21), F(61, 112), F(1)),
 					std::to_wstring(nowPage + 1) + L" / " + std::to_wstring(pageNum)
 				);
 				pageInform.SetHasBackground(false).SetHasFrame(false).DrawSketch(false);
-			};
+				};
 			while (true) {
-				buttons.Clear(); // ÖØÖÃ°´Å¥ÃÇ
-				std::optional<size_t> choice = std::nullopt; // Ñ¡ÔñÁËÄÄ¸ö°´Å¥
-				int crossSize = (std::min)(GetConfigManager().GetWidth() / 38, GetConfigManager().GetHeight() / 24); // ºì²æ²æµÄ´óĞ¡
+				buttons.Clear(); // é‡ç½®æŒ‰é’®ä»¬
+				std::optional<size_t> choice = std::nullopt; // é€‰æ‹©äº†å“ªä¸ªæŒ‰é’®
+				int crossSize = (std::min)(GetConfigManager().GetWidth() / 38, GetConfigManager().GetHeight() / 24); // çº¢å‰å‰çš„å¤§å°
 				buttons.AddButtonAsCross(Coordinate(GetConfigManager().GetWidth() - crossSize, crossSize), crossSize, [&choice](Button&) {choice = 0; });
 				constexpr F bWidth(433, 1500);
 				constexpr F bHeight(3, 28);
@@ -203,7 +189,7 @@ namespace NVisualSort {
 						InputBox inputBox;
 						inputBox.SetTitleText(GetVisualSort().GetSorts()[sortIndex].GetSortName());
 						inputBox.SetMaxNum(GetVisualSort().GetSorts()[sortIndex].GetMaxSize());
-						std::wstring contentText = L"ÊıÖµ²»³¬¹ı" + std::to_wstring(GetVisualSort().GetSorts()[sortIndex].GetMaxSize());
+						std::wstring contentText = L"æ•°å€¼ä¸è¶…è¿‡" + std::to_wstring(GetVisualSort().GetSorts()[sortIndex].GetMaxSize());
 						for (auto it = GetVisualSort().GetSorts()[sortIndex].GetNumRequires().begin();
 							it != GetVisualSort().GetSorts()[sortIndex].GetNumRequires().end(); ++it) {
 							contentText += L"\n" + it->GetRequireInform();
@@ -214,7 +200,7 @@ namespace NVisualSort {
 							std::vector<std::wstring> errorMessages;
 							if (resultNum > 1) {
 								if (resultNum > GetVisualSort().GetSorts()[sortIndex].GetMaxSize()) {
-									errorMessages.emplace_back(L"Êı¾İÁ¿³¬¹ıÔÊĞí×î´óÖµ");
+									errorMessages.emplace_back(L"æ•°æ®é‡è¶…è¿‡å…è®¸æœ€å¤§å€¼");
 								}
 								for (size_t i = 0; i < GetVisualSort().GetSorts()[sortIndex].GetNumRequires().size(); ++i) {
 									if (!GetVisualSort().GetSorts()[sortIndex].GetNumRequires()[i].Check(resultNum)) {
@@ -235,19 +221,19 @@ namespace NVisualSort {
 								}
 							}
 							Button::GetDefaultHoverDrawFunction()(button_, {});
-						});
+							});
 						inputBox.RunBlockInputLoop();
 						GetDrawingTool().ClearDevice();
 						if (pageNum > 1) {
 							DrawPageInform();
 						}
 						buttons.DrawButtons();
-					});
+						});
 				}
 				if (pageNum > 1) {
 					buttons.AddButton(ComputeRect(GetConfigManager().GetCanvasRect(),
-						F(41, 112), F(20, 21), F(51, 112), F(1)), L"ÉÏÒ»Ò³", [&choice](Button& button_, ExMessage) {
-							if(nowPage > 0) {
+						F(41, 112), F(20, 21), F(51, 112), F(1)), L"ä¸Šä¸€é¡µ", [&choice](Button& button_, ExMessage) {
+							if (nowPage > 0) {
 								choice = 1;
 								buttons.SetExitFlag(true);
 							}
@@ -255,7 +241,7 @@ namespace NVisualSort {
 						}
 					);
 					buttons.AddButton(ComputeRect(GetConfigManager().GetCanvasRect(),
-						F(61, 112), F(20, 21), F(71, 112), F(1)), L"ÏÂÒ»Ò³", [&choice](Button& button_, ExMessage) {
+						F(61, 112), F(20, 21), F(71, 112), F(1)), L"ä¸‹ä¸€é¡µ", [&choice](Button& button_, ExMessage) {
 							if (nowPage + 1 < pageNum) {
 								choice = 2;
 								buttons.SetExitFlag(true);
@@ -271,7 +257,7 @@ namespace NVisualSort {
 				}
 				buttons.RunBlockButtonLoop();
 				if (!choice.has_value()) {
-					throw WideError(L"Î´Ñ¡ÔñÈÎºÎÑ¡Ïî");
+					throw WideError(L"æœªé€‰æ‹©ä»»ä½•é€‰é¡¹");
 				}
 				else if (choice.value() == 0) {
 					return;
@@ -287,7 +273,7 @@ namespace NVisualSort {
 					}
 				}
 				else {
-					throw WideError(L"Î´ÖªÑ¡Ïî");
+					throw WideError(L"æœªçŸ¥é€‰é¡¹");
 				}
 			}
 		}
@@ -314,9 +300,9 @@ namespace NVisualSort {
 			constexpr F lMargin(1, 22);
 			constexpr F tMargin(1, 16);
 			constexpr F vertiGap(1, 16);
-			constexpr const wchar_t* sketchTexts[] = { L"ÏÔÊ¾´òÂÒ¹ı³Ì",L"´°¿ÚÈ«ÆÁÏÔÊ¾",L"µ÷Õû´°¿Ú¿í¶È",L"µ÷Õû´°¿Ú¸ß¶È" };
+			constexpr const wchar_t* sketchTexts[] = { L"æ˜¾ç¤ºæ‰“ä¹±è¿‡ç¨‹",L"çª—å£å…¨å±æ˜¾ç¤º",L"è°ƒæ•´çª—å£å®½åº¦",L"è°ƒæ•´çª—å£é«˜åº¦" };
 			for (size_t i = 0; i < 4; ++i) {
-				sketches[i].SetSketch(ComputeRect(mainSketch.GetFrameRect(),
+				sketches[i].SetAttribute(ComputeRect(mainSketch.GetFrameRect(),
 					lMargin, tMargin + i * (sHeight + vertiGap),
 					lMargin + sWidth, tMargin + i * (sHeight + vertiGap) + sHeight),
 					sketchTexts[i]
@@ -329,21 +315,21 @@ namespace NVisualSort {
 					sketches[i].DrawSketch(false);
 				}
 				buttons.DrawButtons(false);
-			};
+				};
 			buttons.SetButtonAsSwitch(0, ComputeRect(mainSketch.GetFrameRect(),
 				F(15, 22), F(1, 16), F(21, 22), F(3, 16)), isShowShuffle
 			);
 			buttons.SetButtonAsSwitch(1, ComputeRect(mainSketch.GetFrameRect(),
 				F(15, 22), F(1, 4), F(21, 22), F(3, 8)), isFullScreen, []() {
 					if (isFullScreen) {
-						buttons.GetButtons()[2].GetSketch().SetTextWithoutResize(std::to_wstring(static_cast<int>(GetConfigManager().GetMaxWidth())));
-						buttons.GetButtons()[3].GetSketch().SetTextWithoutResize(std::to_wstring(static_cast<int>(GetConfigManager().GetMaxHeight())));
-						buttons.GetButtons()[2].GetSketch().DrawSketch();
-						buttons.GetButtons()[3].GetSketch().DrawSketch();
+						buttons.GetButtons()[2].SetTextWithoutResize(std::to_wstring(static_cast<int>(GetConfigManager().GetMaxWidth())));
+						buttons.GetButtons()[3].SetTextWithoutResize(std::to_wstring(static_cast<int>(GetConfigManager().GetMaxHeight())));
+						buttons.GetButtons()[2].DrawSketch();
+						buttons.GetButtons()[3].DrawSketch();
 					}
 					else {
-						buttons.GetButtons()[3].GetSketch().SetTextWithoutResize(std::to_wstring(static_cast<int>(GetConfigManager().GetMaxClientHeight())));
-						buttons.GetButtons()[3].GetSketch().DrawSketch();
+						buttons.GetButtons()[3].SetTextWithoutResize(std::to_wstring(static_cast<int>(GetConfigManager().GetMaxClientHeight())));
+						buttons.GetButtons()[3].DrawSketch();
 					}
 				}
 			);
@@ -353,123 +339,116 @@ namespace NVisualSort {
 				std::to_wstring(static_cast<int>(GetConfigManager().GetWidth())), [](Button& button_, ExMessage) {
 					if (!isFullScreen) {
 						InputBox inputBox;
-						inputBox.SetTitleText(L"ÊäÈë´°¿Ú¿í¶È").
-							SetContentText(L"ÊıÖµ²»³¬¹ı" + std::to_wstring(static_cast<int>(GetConfigManager().GetMaxWidth())) + L"\n" +
-							L"ÊıÖµ²»Ğ¡ÓÚ" + std::to_wstring(static_cast<int>(GetConfigManager().GetMinWidth()))).
+						inputBox.SetTitleText(L"è¾“å…¥çª—å£å®½åº¦").
+							SetContentText(L"æ•°å€¼ä¸è¶…è¿‡" + std::to_wstring(static_cast<int>(GetConfigManager().GetMaxWidth())) + L"\n" +
+								L"æ•°å€¼ä¸å°äº" + std::to_wstring(static_cast<int>(GetConfigManager().GetMinWidth()))).
 							SetMaxNum(GetConfigManager().GetMaxWidth()).SetCrossFunc([]() {
-								GetDrawingTool().ClearDevice();
-								DrawSetMenuFunc();
-								GetDrawingTool().FlushBatchDraw();
-							}).
-							SetExcutFunc([&button_, &inputBox](Button&, ExMessage) {
-							size_t result = inputBox.GetInputNum();
-							if (result < static_cast<size_t>(GetConfigManager().GetMinWidth())) {
-								Dialog prompt(L"ÊıÖµ¹ıĞ¡");
-								prompt.RunBlockDialog();
-							}
-							else if (result > static_cast<size_t>(GetConfigManager().GetMaxWidth())) {
-								Dialog prompt(L"ÊıÖµ¹ı´ó");
-								prompt.RunBlockDialog();
-							}
-							else {
-								inputBox.SetExitFlag(true);
-								button_.GetSketch().SetTextWithoutResize(std::to_wstring(result));
-								GetDrawingTool().ClearDevice();
-								DrawSetMenuFunc();
-								GetDrawingTool().FlushBatchDraw();
-								return;
-							}
 							GetDrawingTool().ClearDevice();
-							inputBox.DrawInputBox();
-						});
-						inputBox.RunBlockInputLoop();
+							DrawSetMenuFunc();
+							GetDrawingTool().FlushBatchDraw();
+								}).
+							SetExcutFunc([&button_, &inputBox](Button&, ExMessage) {
+									size_t result = inputBox.GetInputNum();
+									if (result < static_cast<size_t>(GetConfigManager().GetMinWidth())) {
+										Dialog prompt(L"æ•°å€¼è¿‡å°");
+										prompt.RunBlockDialog();
+									}
+									else if (result > static_cast<size_t>(GetConfigManager().GetMaxWidth())) {
+										Dialog prompt(L"æ•°å€¼è¿‡å¤§");
+										prompt.RunBlockDialog();
+									}
+									else {
+										inputBox.SetExitFlag(true);
+										button_.SetTextWithoutResize(std::to_wstring(result));
+										GetDrawingTool().ClearDevice();
+										DrawSetMenuFunc();
+										GetDrawingTool().FlushBatchDraw();
+										return;
+									}
+									GetDrawingTool().ClearDevice();
+									inputBox.DrawInputBox();
+								});
+								inputBox.RunBlockInputLoop();
 					}
 					else {
-						Dialog prompt(L"È«ÆÁ×´Ì¬ÏÂ£¬²»ÄÜĞŞ¸Ä´°¿Ú¿í¶È");
+						Dialog prompt(L"å…¨å±çŠ¶æ€ä¸‹ï¼Œä¸èƒ½ä¿®æ”¹çª—å£å®½åº¦");
 						prompt.RunBlockDialog();
 						GetDrawingTool().ClearDevice();
 						DrawSetMenuFunc();
 						GetDrawingTool().FlushBatchDraw();
 					}
 				}
-			).GetSketch().SetTextMode(DT_LEFT).SetFrameRoundSize(0);
+			).SetTextMode(DT_LEFT).SetFrameRoundSize(0);
 
 			buttons.GetButtons()[3].SetButton(ComputeRect(mainSketch.GetFrameRect(),
 				F(15, 22), F(5, 8), F(21, 22), F(3, 4)),
 				std::to_wstring(static_cast<int>(GetConfigManager().GetHeight())), [](Button& button_, ExMessage) {
 					if (!isFullScreen) {
 						InputBox inputBox;
-						inputBox.SetTitleText(L"ÊäÈë´°¿Ú¸ß¶È").
-							SetContentText(L"ÊıÖµ²»³¬¹ı" + std::to_wstring(static_cast<int>(GetConfigManager().GetMaxClientHeight())) + L"\n" +
-								L"ÊıÖµ²»Ğ¡ÓÚ" + std::to_wstring(static_cast<int>(GetConfigManager().GetMinHeight()))).
+						inputBox.SetTitleText(L"è¾“å…¥çª—å£é«˜åº¦").
+							SetContentText(L"æ•°å€¼ä¸è¶…è¿‡" + std::to_wstring(static_cast<int>(GetConfigManager().GetMaxClientHeight())) + L"\n" +
+								L"æ•°å€¼ä¸å°äº" + std::to_wstring(static_cast<int>(GetConfigManager().GetMinHeight()))).
 							SetMaxNum(GetConfigManager().GetMaxClientHeight()).SetCrossFunc([]() {
-								GetDrawingTool().ClearDevice();
-								DrawSetMenuFunc();
-								GetDrawingTool().FlushBatchDraw();
-							}).
-							SetExcutFunc([&button_, &inputBox](Button&, ExMessage) {
-							size_t result = inputBox.GetInputNum();
-							if (result < static_cast<size_t>(GetConfigManager().GetMinHeight())) {
-								Dialog prompt(L"ÊıÖµ¹ıĞ¡");
-								prompt.RunBlockDialog();
-							}
-							else if (result > static_cast<size_t>(GetConfigManager().GetMaxHeight())) {
-								Dialog prompt(L"ÊıÖµ¹ı´ó");
-								prompt.RunBlockDialog();
-							}
-							else {
-								inputBox.SetExitFlag(true);
-								button_.GetSketch().SetTextWithoutResize(std::to_wstring(result));
-								GetDrawingTool().ClearDevice();
-								DrawSetMenuFunc();
-								GetDrawingTool().FlushBatchDraw();
-								return;
-							}
 							GetDrawingTool().ClearDevice();
-							inputBox.DrawInputBox();
-						});
-						inputBox.RunBlockInputLoop();
+							DrawSetMenuFunc();
+							GetDrawingTool().FlushBatchDraw();
+								}).
+							SetExcutFunc([&button_, &inputBox](Button&, ExMessage) {
+									size_t result = inputBox.GetInputNum();
+									if (result < static_cast<size_t>(GetConfigManager().GetMinHeight())) {
+										Dialog prompt(L"æ•°å€¼è¿‡å°");
+										prompt.RunBlockDialog();
+									}
+									else if (result > static_cast<size_t>(GetConfigManager().GetMaxHeight())) {
+										Dialog prompt(L"æ•°å€¼è¿‡å¤§");
+										prompt.RunBlockDialog();
+									}
+									else {
+										inputBox.SetExitFlag(true);
+										button_.SetTextWithoutResize(std::to_wstring(result));
+										GetDrawingTool().ClearDevice();
+										DrawSetMenuFunc();
+										GetDrawingTool().FlushBatchDraw();
+										return;
+									}
+									GetDrawingTool().ClearDevice();
+									inputBox.DrawInputBox();
+								});
+								inputBox.RunBlockInputLoop();
 					}
 					else {
-						Dialog prompt(L"È«ÆÁ×´Ì¬ÏÂ£¬²»ÄÜĞŞ¸Ä´°¿Ú¸ß¶È");
+						Dialog prompt(L"å…¨å±çŠ¶æ€ä¸‹ï¼Œä¸èƒ½ä¿®æ”¹çª—å£é«˜åº¦");
 						prompt.RunBlockDialog();
 						GetDrawingTool().ClearDevice();
 						DrawSetMenuFunc();
 						GetDrawingTool().FlushBatchDraw();
 					}
 				}
-			).GetSketch().SetTextMode(DT_LEFT).SetFrameRoundSize(0);
+			).SetTextMode(DT_LEFT).SetFrameRoundSize(0);
 
 			static std::optional<bool> confirm = std::nullopt;
 			confirm = std::nullopt;
 			buttons.GetButtons()[4].SetButton(ComputeRect(mainSketch.GetFrameRect(),
-				F(2, 11), F(13, 16), F(4, 11), F(15, 16)), L"È·ÈÏ", [](Button&, ExMessage) {
+				F(2, 11), F(13, 16), F(4, 11), F(15, 16)), L"ç¡®è®¤", [](Button&, ExMessage) {
 					confirm = true;
 					buttons.SetExitFlag(true);
 				}
-			).GetSketch().SetFrameRoundSize(5);
+			).SetFrameRoundSize(5);
 			buttons.GetButtons()[5].SetButton(ComputeRect(mainSketch.GetFrameRect(),
-				F(7, 11), F(13, 16), F(9, 11), F(15, 16)), L"È¡Ïû", [](Button&, ExMessage) {
+				F(7, 11), F(13, 16), F(9, 11), F(15, 16)), L"å–æ¶ˆ", [](Button&, ExMessage) {
 					confirm = false;
 					buttons.SetExitFlag(true);
 				}
-			).GetSketch().SetFrameRoundSize(5);
+			).SetFrameRoundSize(5);
 
 			GetDrawingTool().ClearDevice();
 			DrawSetMenuFunc();
 			buttons.RunBlockButtonLoop();
 
-			ButtonSequence::s_exitGetMessage.store(true, std::memory_order_release);
-			PostMessage(GetHWnd(), WM_MOUSEMOVE, 0, MAKELPARAM(0, 0));
-			if (this->m_getMessageThreadPtr->joinable()) {
-				this->m_getMessageThreadPtr->join();
-			}
-			else {
-				throw WideError(L"»ñÈ¡Êó±êÏûÏ¢µÄÏß³ÌÎŞ·¨»Ø¹é");
-			}
+			MouseMessageSource::GetInstance().Stop();
 
 			if (!confirm.has_value()) {
-				throw WideError(L"Î´ÖªµÄÑ¡Ïî£¡");
+				throw WideError(L"æœªçŸ¥çš„é€‰é¡¹ï¼");
 			}
 			else if (confirm.value()) {
 				GetVisualSort().SetShowShuffle(isShowShuffle);
@@ -482,13 +461,13 @@ namespace NVisualSort {
 				else {
 					if (this->m_fullScreen) {
 						this->m_fullScreen = false;
-						GetConfigManager().SetWidth(std::stoi(buttons.GetButtons()[2].GetSketch().GetText()));
-						GetConfigManager().SetHeight(std::stoi(buttons.GetButtons()[3].GetSketch().GetText()));
+						GetConfigManager().SetWidth(std::stoi(buttons.GetButtons()[2].GetText()));
+						GetConfigManager().SetHeight(std::stoi(buttons.GetButtons()[3].GetText()));
 						this->ResizeWindow();
 					}
 					else {
-						int tempWidth = std::stoi(buttons.GetButtons()[2].GetSketch().GetText());
-						int tempHeight = std::stoi(buttons.GetButtons()[3].GetSketch().GetText());
+						int tempWidth = std::stoi(buttons.GetButtons()[2].GetText());
+						int tempHeight = std::stoi(buttons.GetButtons()[3].GetText());
 						if (F(tempWidth) != GetConfigManager().GetWidth() || F(tempHeight) != GetConfigManager().GetHeight()) {
 							GetConfigManager().SetWidth(tempWidth);
 							GetConfigManager().SetHeight(tempHeight);
@@ -497,10 +476,8 @@ namespace NVisualSort {
 					}
 				}
 			}
-			this->m_getMessageThreadPtr = std::make_shared<std::thread>(ButtonSequence::GetMessageLoop);
+			MouseMessageSource::GetInstance().Start();
 		}
-
-	public:
 
 		friend inline MainMenu& GetMainMenu();
 

@@ -13,7 +13,7 @@
 // are registered with the power-of-two size constraint. The Parallel variants keep the
 // Java thread structure (std::thread + join); the Recursive variants are plain recursion
 // because the Java sources do not spawn threads in them.
-#include "SortHelpers.h"
+#include "SortHelpers.hpp"
 #include <cmath>
 #include <cstddef>
 #include <thread>
@@ -467,7 +467,9 @@ namespace NVisualSort::NSortAlgorithms {
         ptrdiff_t end = static_cast<ptrdiff_t>(data_.size());
 
         ptrdiff_t ceilLog = 1;
-        for (; (static_cast<ptrdiff_t>(1) << ceilLog) < end; ceilLog++);
+        while ((static_cast<ptrdiff_t>(1) << ceilLog) < end) {
+            ceilLog++;
+        }
         ptrdiff_t size = static_cast<ptrdiff_t>(1) << ceilLog;
 
         for (ptrdiff_t k = size >> 1; k > 0; k >>= 1) {
@@ -615,7 +617,9 @@ namespace NVisualSort::NSortAlgorithms {
         // t = (int)(log(length - 1) / log(2)) + 1; p0 = 1 << (t - 1):
         // the largest power of two strictly less than length.
         ptrdiff_t p0 = 1;
-        for (; p0 * 2 < length; p0 *= 2);
+        while (p0 * 2 < length) {
+            p0 *= 2;
+        }
 
         for (ptrdiff_t p = p0; p > 0; p >>= 1) {
             ptrdiff_t q = p0;
@@ -812,7 +816,9 @@ namespace NVisualSort::NSortAlgorithms {
         };
 
         ptrdiff_t n = 1;
-        for (; n < end; n <<= 1);
+        while (n < end) {
+            n <<= 1;
+        }
 
         for (ptrdiff_t k = n >> 1; k > 0; k >>= 1) {
             for (ptrdiff_t j = 0; j < end; j += k << 1) {

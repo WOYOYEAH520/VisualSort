@@ -15,10 +15,10 @@
 // so it opens its own namespace and closes it again at the end of the file.
 // All helpers are self-contained: they may call other NSortHelpers functions and the
 // standard library only, never a category sort.
-#include "Strip.h"
-#include "Counter.h"
-#include "ConfigManager.h"
-#include "WideError.h"
+#include "Strip.hpp"
+#include "Counter.hpp"
+#include "ConfigManager.hpp"
+#include "WideError.hpp"
 #include <algorithm>
 #include <array>
 #include <atomic>
@@ -715,8 +715,9 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
     template<class T>
     void kWaySiftDown(std::vector<T>& src, std::vector<ptrdiff_t>& heap, std::vector<ptrdiff_t>& pa, ptrdiff_t t, ptrdiff_t r, ptrdiff_t size) {
         while (2 * r + 2 < size) {
-            ptrdiff_t nxt = 2 * r + 1;
-            ptrdiff_t min = nxt + (kWayKeyLessThan(src, pa, heap[nxt], heap[nxt + 1]) ? 0 : 1);
+            ptrdiff_t left = 2 * r + 1;
+            ptrdiff_t right = left + 1;
+            ptrdiff_t min = kWayKeyLessThan(src, pa, heap[left], heap[right]) ? left : right;
 
             if (kWayKeyLessThan(src, pa, heap[min], t)) {
                 heap[r] = heap[min];
@@ -3265,7 +3266,8 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
 
         for (ptrdiff_t keyIndex = 1; keyIndex < blockCount; ++keyIndex, processIndex += blockLen) {
             restToProcess = processIndex - leftOverLen;
-            ptrdiff_t nextFrag = CompareValues(data_[keysPos + keyIndex], data_[midkey]) < 0 ? 0 : 1;
+            ptrdiff_t nextFrag = CompareValues(data_[keysPos + keyIndex], data_[midkey]) < 0
+                ? ptrdiff_t{ 0 } : ptrdiff_t{ 1 };
 
             if (nextFrag == leftOverFrag) {
                 if (havebuf) grailMultiSwap(data_, pos + restToProcess - blockLen, pos + restToProcess, leftOverLen);
@@ -3332,7 +3334,8 @@ namespace NVisualSort::NSortAlgorithms::NSortHelpers {
         ptrdiff_t restToProcess;
         for (ptrdiff_t keyIndex = 1; keyIndex < blockCount; ++keyIndex, processIndex += regBlockLen) {
             restToProcess = processIndex - leftOverLen;
-            ptrdiff_t nextFrag = CompareValues(data_[keysPos + keyIndex], data_[midkey]) < 0 ? 0 : 1;
+            ptrdiff_t nextFrag = CompareValues(data_[keysPos + keyIndex], data_[midkey]) < 0
+                ? ptrdiff_t{ 0 } : ptrdiff_t{ 1 };
 
             if (nextFrag == leftOverFrag) {
                 // Writes.arraycopy(arr, pos + restToProcess, arr, pos + restToProcess - regBlockLen, leftOverLen)

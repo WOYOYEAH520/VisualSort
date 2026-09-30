@@ -1,16 +1,16 @@
 #pragma once
-#include "Fraction.h"
-#include "Sketch.h"
+#include "Fraction.hpp"
+#include "Sketch.hpp"
 #include <string>
-#include "Button.h"
+#include "Button.hpp"
 #include <algorithm>
-#include "ConfigManager.h"
+#include "ConfigManager.hpp"
 #include <Windows.h>
 #include <vector>
 #include <utility>
-#include "Coordinate.h"
+#include "Coordinate.hpp"
 #include <functional>
-#include "WideError.h"
+#include "WideError.hpp"
 #include <easyx.h>
 
 namespace NVisualSort {
@@ -19,19 +19,19 @@ namespace NVisualSort {
 
 	private:
 
-		inline static constexpr Fraction MinWidth{ 1,2 }; // ×îĞ¡¿í¶ÈÎª»­²¼¿í¶ÈµÄ1/2
-		inline static constexpr Fraction MinHeight{ 1,2 }; // ×îĞ¡¸ß¶ÈÎª»­²¼¸ß¶ÈµÄ1/2
-		inline static constexpr Fraction MaxWidth{ 8,9 }; // ×î´ó¿í¶ÈÎª»­²¼¿í¶ÈµÄ8/9
-		inline static constexpr Fraction MaxHeight{ 8,9 }; // ×î´ó¸ß¶ÈÎª»­²¼¸ß¶ÈµÄ8/9
-		inline static constexpr Fraction AspectRatio{ 1,2 }; // ¸ß¿í±ÈÎª1:2
+		inline static constexpr Fraction MinWidth{ 1,2 }; // æœ€å°å®½åº¦ä¸ºç”»å¸ƒå®½åº¦çš„1/2
+		inline static constexpr Fraction MinHeight{ 1,2 }; // æœ€å°é«˜åº¦ä¸ºç”»å¸ƒé«˜åº¦çš„1/2
+		inline static constexpr Fraction MaxWidth{ 8,9 }; // æœ€å¤§å®½åº¦ä¸ºç”»å¸ƒå®½åº¦çš„8/9
+		inline static constexpr Fraction MaxHeight{ 8,9 }; // æœ€å¤§é«˜åº¦ä¸ºç”»å¸ƒé«˜åº¦çš„8/9
+		inline static constexpr Fraction AspectRatio{ 1,2 }; // é«˜å®½æ¯”ä¸º1:2
 
-		ButtonSequence m_buttons; // °´Å¥ĞòÁĞ
-		Sketch m_mainBox;         // Ö÷¶Ô»°¿ò
-		Sketch m_titleBox;        // ±êÌâÇøÓò
-		Sketch m_contentBox;      // ÄÚÈİÇøÓò
-		Sketch m_inputBox;        // ÊäÈëÇøÓò
-		std::wstring m_inputText; // ÊäÈëÎÄ±¾
-		size_t m_maxNum = 99999;  // ÊäÈë×î´óÖµÏŞÖÆ
+		ButtonSequence m_buttons; // æŒ‰é’®åºåˆ—
+		Sketch m_mainBox;         // ä¸»å¯¹è¯æ¡†
+		Sketch m_titleBox;        // æ ‡é¢˜åŒºåŸŸ
+		Sketch m_contentBox;      // å†…å®¹åŒºåŸŸ
+		Sketch m_inputBox;        // è¾“å…¥åŒºåŸŸ
+		std::wstring m_inputText; // è¾“å…¥æ–‡æœ¬
+		size_t m_maxNum = 99999;  // è¾“å…¥æœ€å¤§å€¼é™åˆ¶
 
 		void ClampMainRect() {
 			using F = Fraction;
@@ -47,7 +47,8 @@ namespace NVisualSort {
 			);
 			if (adjustedHeight > adjustedWidth * InputBox::AspectRatio) {
 				adjustedHeight = adjustedWidth * InputBox::AspectRatio;
-			} else {
+			}
+			else {
 				adjustedWidth = adjustedHeight / InputBox::AspectRatio;
 			}
 			this->m_mainBox.SetFrameRect(RECT(
@@ -59,16 +60,16 @@ namespace NVisualSort {
 		}
 
 		void SetButtonsAuto() {
-			constexpr const wchar_t* buttonString[] = { L"1",L"2",L"3",L"4",L"5",L"6",L"7",L"8",L"9",L"È·ÈÏ",L"0",L"É¾³ı" };
+			constexpr const wchar_t* buttonString[] = { L"1",L"2",L"3",L"4",L"5",L"6",L"7",L"8",L"9",L"ç¡®è®¤",L"0",L"åˆ é™¤" };
 			std::vector<Button> buttons(13);
 			using F = Fraction;
-			F leftMargin(7, 13); // ×ó±ß¾àÎª dialog ´°¿Ú¿í¶ÈµÄ7/13
-			F bWidth(3, 26); // °´Å¥¿í¶ÈÎª dialog ´°¿Ú¿í¶ÈµÄ3/26
-			F horiGap(1, 26); // °´Å¥Ë®Æ½¼ä¾àÎª dialog ´°¿Ú¿í¶ÈµÄ1/26
-			F topMargin(1, 13); // ÉÏ±ß¾àÎª dialog ´°¿Ú¸ß¶ÈµÄ1/13
-			F bHeight(2, 13); // °´Å¥¸ß¶ÈÎª dialog ´°¿Ú¸ß¶ÈµÄ2/13
-			F vertGap(1, 13); // °´Å¥´¹Ö±¼ä¾àÎª dialog ´°¿Ú¸ß¶ÈµÄ1/13
-			size_t horiCount = 3; // Ã¿ĞĞ°´Å¥ÊıÁ¿
+			F leftMargin(7, 13); // å·¦è¾¹è·ä¸º dialog çª—å£å®½åº¦çš„7/13
+			F bWidth(3, 26); // æŒ‰é’®å®½åº¦ä¸º dialog çª—å£å®½åº¦çš„3/26
+			F horiGap(1, 26); // æŒ‰é’®æ°´å¹³é—´è·ä¸º dialog çª—å£å®½åº¦çš„1/26
+			F topMargin(1, 13); // ä¸Šè¾¹è·ä¸º dialog çª—å£é«˜åº¦çš„1/13
+			F bHeight(2, 13); // æŒ‰é’®é«˜åº¦ä¸º dialog çª—å£é«˜åº¦çš„2/13
+			F vertGap(1, 13); // æŒ‰é’®å‚ç›´é—´è·ä¸º dialog çª—å£é«˜åº¦çš„1/13
+			size_t horiCount = 3; // æ¯è¡ŒæŒ‰é’®æ•°é‡
 			for (size_t i = 0; i < 12; ++i) {
 				RECT tempRect = ComputeRect(this->m_mainBox.GetFrameRect(),
 					leftMargin + (bWidth + horiGap) * (i % horiCount),
@@ -77,20 +78,20 @@ namespace NVisualSort {
 					topMargin + (bHeight + vertGap) * (i / horiCount) + bHeight
 				);
 				buttons[i].SetButton(tempRect, buttonString[i]);
-				if (i != 9 && i != 11) { // Êı×Ö°´Å¥
+				if (i != 9 && i != 11) { // æ•°å­—æŒ‰é’®
 					buttons[i].SetReleaseFunc([this](Button& button_, ExMessage) {
 						if (this->m_inputBox.GetText() == L"0") {
-							this->m_inputBox.SetTextWithoutResize(button_.GetSketch().GetText());
+							this->m_inputBox.SetTextWithoutResize(button_.GetText());
 						}
 						else {
-							this->m_inputBox.SetTextWithoutResize(this->m_inputBox.GetText() + button_.GetSketch().GetText());
+							this->m_inputBox.SetTextWithoutResize(this->m_inputBox.GetText() + button_.GetText());
 							if (std::stoull(this->m_inputBox.GetText()) > this->m_maxNum) {
 								this->m_inputBox.SetTextWithoutResize(std::to_wstring(this->m_maxNum));
 							}
 						}
 						this->m_inputBox.DrawSketch();
 						Button::GetDefaultHoverDrawFunction()(button_, {});
-					});
+						});
 				}
 			}
 			buttons[11].SetReleaseFunc([this](Button& button_, ExMessage) {
@@ -99,7 +100,7 @@ namespace NVisualSort {
 					this->m_inputBox.DrawSketch();
 				}
 				Button::GetDefaultHoverDrawFunction()(button_, {});
-			});
+				});
 			this->m_buttons.SetButtons(std::move(buttons));
 			this->SetCrossFunc();
 		}
@@ -111,7 +112,7 @@ namespace NVisualSort {
 			F boxRight(6, 13);
 			F boxBottom(3, 13);
 			this->m_titleBox.SetFrameRect(ComputeRect(this->m_mainBox.GetFrameRect(),
-				leftMargin,topMargin,boxRight,boxBottom
+				leftMargin, topMargin, boxRight, boxBottom
 			));
 			this->m_titleBox.SetTextSize((boxBottom - topMargin) * this->m_mainBox.GetHeight());
 			this->m_titleBox.SetHasFrame(false);
@@ -188,13 +189,13 @@ namespace NVisualSort {
 
 		InputBox& SetExcutFunc(const std::function<void(Button&, ExMessage)>& execut_func_) {
 			if (this->m_buttons.GetButtonNum() != 13) {
-				throw WideError(L"InputBox Î´³õÊ¼»¯£¡");
+				throw WideError(L"InputBox æœªåˆå§‹åŒ–ï¼");
 			}
 			if (execut_func_) {
 				this->m_buttons.GetButtons()[9].SetReleaseFunc([this, execut_func_](Button& button_, ExMessage) {
 					this->m_inputText = this->m_inputBox.GetText();
 					execut_func_(button_, {});
-				});
+					});
 			}
 			return *this;
 		}

@@ -1,6 +1,6 @@
 #pragma once
-#include "ConfigManager.h"
-#include "DrawingTool.h"
+#include "ConfigManager.hpp"
+#include "DrawingTool.hpp"
 #include <chrono>
 #include <easyx.h>
 #include <optional>
@@ -10,28 +10,29 @@
 #include <thread>
 #include <utility>
 #include <vector>
-#include "Fraction.h"
-#include "WideError.h"
-#include "ScopeGuard.h"
+#include "Fraction.hpp"
+#include "WideError.hpp"
+#include "ScopeGuard.hpp"
 #include <set>
 #include <mutex>
 
 namespace NVisualSort {
 
-	// 0≥£¡ø≥ı ºªØ
-	inline std::atomic<size_t> StripCompareNum{0};  // ±»Ωœ¥Œ ˝
-	inline std::atomic<size_t> StripCopyNum{0};     // “˝”√¥Œ ˝
-	inline std::atomic<size_t> StripChangeNum{0};   // –¥»Î¥Œ ˝
-	inline std::atomic<size_t> AnimationStepNum{0}; // ∂Øª≠≤Ω ˝
+	inline std::atomic<size_t> StripCompareNum{ 0 };  // ÊØîËæÉÊ¨°Êï∞
+	inline std::atomic<size_t> StripCopyNum{ 0 };     // ÂºïÁî®Ê¨°Êï∞
+	inline std::atomic<size_t> StripChangeNum{ 0 };   // ÂÜôÂÖ•Ê¨°Êï∞
+	inline std::atomic<size_t> AnimationStepNum{ 0 }; // Âä®ÁîªÊ≠•Êï∞
 
 	constexpr COLORREF StripCopyColor = LIGHTBLUE;
 	constexpr COLORREF StripChangeColor = RED;
 	constexpr COLORREF StripFirstColor = RGB(0x88, 0x88, 0x88);
 	constexpr COLORREF StripLastColor = WHITE;
 
-	constexpr const wchar_t* SortEndsPrematurely = L"≈≈–ÚÃ·«∞Ω· ¯";
+	constexpr Fraction StripMaxTopFrac{ 2,9 };
+	constexpr Fraction StripDensityThreshold{ 1,6 };
 
-	// Ãı–Œ£¨√ø∏ˆ ˝æ›∂º «“ª∏ˆÃı–Œ
+	constexpr const wchar_t* SortEndsPrematurely = L"ÊéíÂ∫èÊèêÂâçÁªìÊùü";
+
 	class Strip {
 
 		friend class VisualSort;
@@ -46,11 +47,14 @@ namespace NVisualSort {
 		int m_left = -1;
 		int m_right = -1;
 		int m_top = 0;
-		COLORREF m_color = BLACK;
+		COLORREF m_color = WHITE;
 		bool m_notTemp = false;
 
-		inline static int s_maxValue = 0;
-		inline static int s_minValue = 0;
+		inline static long long s_maxValue = 0;
+		inline static long long s_minValue = 0;
+		inline static int s_zeroLineY = 0;
+		inline static bool s_isAllSame = false;
+		inline static bool s_isAllZero = false;
 
 		struct Interval {
 			int left = 0;
@@ -59,13 +63,13 @@ namespace NVisualSort {
 			constexpr Interval(int left_, int right_) noexcept : left(left_), right(right_) {}
 		};
 
-		inline static thread_local size_t st_lastOperationNum = 0;
+		inline static thread_local unsigned int st_lastOperationNum = 0;
 		inline static thread_local Interval st_lastInterval1;
 		inline static thread_local std::pair<Interval, Interval> st_lastInterval2;
 
-		inline static std::function<void()> s_sleepFunc;
-		inline static std::function<void(RECT, COLORREF)> s_drawFunc;
-		inline static std::function<void()> s_updateMessageFunc;
+		inline static void(*s_sleepFunc)() = nullptr;
+		inline static void(*s_drawFunc)(RECT, COLORREF) = nullptr;
+		inline static void(*s_updateMessageFunc)() = nullptr;
 
 		inline static std::set<std::thread::id> s_threads;
 		inline static std::mutex s_threadsMutex;
@@ -73,6 +77,7 @@ namespace NVisualSort {
 		inline static bool s_isMulThreadSort = false;
 
 		static void InitValues() {
+			Strip::st_lastOperationNum = 0;
 			Strip::s_stripSortStopTime = std::chrono::milliseconds(0);
 			Strip::s_stopStripSort.store(false, std::memory_order_release);
 			Strip::s_exitStripSort.store(false, std::memory_order_release);
@@ -81,32 +86,82 @@ namespace NVisualSort {
 			StripChangeNum.store(0, std::memory_order_release);
 			AnimationStepNum.store(0, std::memory_order_release);
 			Strip::s_mainThreadId = std::this_thread::get_id();
-			std::thread::id this_id = Strip::s_mainThreadId;
-			std::erase_if(Strip::s_threads, [this_id](const auto& id) {
-				return id != this_id;
-			});
+			std::thread::id thisId = Strip::s_mainThreadId;
+			std::erase_if(Strip::s_threads, [thisId](const auto& id) {
+				return id != thisId;
+				});
 		}
 
-		static void InitValues(const std::vector<int> data_, std::vector<Strip>& strips_,
-			const std::function<void()>& sleep_func_,
-			const std::function<void(RECT, COLORREF)>& draw_func_,
-			const std::function<void()>& update_message_func_,
+		static void InitValues(const std::vector<int> data_,
+			std::vector<Strip>& strips_,
+			void(*sleep_func)(),
+			void(*update_message_func_)(),
 			bool is_mul_thread_sort_) {
 			Strip::InitValues();
-			Strip::s_sleepFunc = sleep_func_;
-			Strip::s_drawFunc = draw_func_;
+			Strip::s_sleepFunc = sleep_func;
 			Strip::s_updateMessageFunc = update_message_func_;
 			Strip::s_isMulThreadSort = is_mul_thread_sort_;
-			strips_.clear(); // ÷±Ω”«Âø’£¨∑Ò‘Ú»Áπ˚resize£¨ƒ«√¥vectorµ◊≤„ø…ƒ‹ª·∏¥÷∆strip£¨¥”∂¯¥•∑¢∂Øª≠
+			strips_.clear(); // Áõ¥Êé•Ê∏ÖÁ©∫ÔºåÂê¶ÂàôÂ¶ÇÊûúresizeÔºåÈÇ£‰πàvectorÂ∫ïÂ±ÇÂèØËÉΩ‰ºöÂ§çÂà∂stripÔºå‰ªéËÄåËß¶ÂèëÂä®Áîª
 			strips_.resize(data_.size());
-			int tempMinValue = data_[0];
-			int tempMaxValue = data_[0];
+			long long tempMinValue = static_cast<long long>(data_[0]);
+			long long tempMaxValue = static_cast<long long>(data_[0]);
 			for (size_t dataIndex = 1; dataIndex < data_.size(); ++dataIndex) {
-				if (tempMinValue > data_[dataIndex]) tempMinValue = data_[dataIndex];
-				else if (tempMaxValue < data_[dataIndex]) tempMaxValue = data_[dataIndex];
+				if (tempMinValue > data_[dataIndex]) tempMinValue = static_cast<long long>(data_[dataIndex]);
+				else if (tempMaxValue < data_[dataIndex]) tempMaxValue = static_cast<long long>(data_[dataIndex]);
 			}
 			Strip::s_minValue = tempMinValue;
 			Strip::s_maxValue = tempMaxValue;
+			auto height = GetConfigManager().GetHeight();
+			static int MiddleTop = 0;
+			MiddleTop = (1 + StripMaxTopFrac) * height / 2;
+			if (tempMinValue == tempMaxValue) {
+				Strip::s_isAllSame = true;
+				if (tempMinValue > 0) {
+					Strip::s_isAllZero = false;
+					Strip::s_minValue = 0;
+					Strip::s_maxValue *= 2;
+					Strip::s_zeroLineY = height;
+				}
+				else if (tempMinValue < 0) {
+					Strip::s_isAllZero = false;
+					Strip::s_maxValue = 0;
+					Strip::s_zeroLineY = (1 + StripMaxTopFrac) * height / 2;
+				}
+				else {
+					Strip::s_isAllZero = true;
+					Strip::s_zeroLineY = height;
+				}
+				if (height * StripDensityThreshold < data_.size()) {
+					Strip::s_drawFunc = [](RECT rect_, COLORREF color_) {
+						GetDrawingTool().SolidRectangle(rect_.left, MiddleTop, rect_.right, GetConfigManager().GetHeight(), color_);
+						};
+				}
+				else {
+					Strip::s_drawFunc = [](RECT rect_, COLORREF color_) {
+						GetDrawingTool().FillRectangle(rect_.left, MiddleTop, rect_.right, GetConfigManager().GetHeight(), 1, PS_SOLID, BLACK, color_);
+						};
+				}
+			}
+			else {
+				Strip::s_isAllSame = false;
+				Strip::s_isAllZero = false;
+				if (tempMinValue < 0) {
+					Strip::s_zeroLineY = height + tempMinValue * (height - Strip::StripMaxTop()) / (tempMaxValue - tempMinValue);
+				}
+				else {
+					Strip::s_zeroLineY = height;
+				}
+				if (height * StripDensityThreshold < data_.size()) {
+					Strip::s_drawFunc = [](RECT rect_, COLORREF color_) {
+						GetDrawingTool().SolidRectangle(rect_, color_);
+						};
+				}
+				else {
+					Strip::s_drawFunc = [](RECT rect_, COLORREF color_) {
+						GetDrawingTool().FillRectangle(rect_, 1, PS_SOLID, BLACK, color_);
+						};
+				}
+			}
 			for (size_t stripIndex = 0; stripIndex < strips_.size(); ++stripIndex) {
 				int tempLeft = stripIndex * GetConfigManager().GetWidth() / strips_.size();
 				int tempRight = (stripIndex + 1) * GetConfigManager().GetWidth() / strips_.size();
@@ -114,7 +169,7 @@ namespace NVisualSort {
 			}
 		}
 
-		static void DrawRemainingStrip() {
+		static void FlushRemainingStrip() {
 			if (Strip::st_lastOperationNum == 1) {
 				GetDrawingTool().FlushBatchDraw(Strip::st_lastInterval1.left, Strip::StripMaxTop(), Strip::st_lastInterval1.right, GetConfigManager().GetHeight());
 			}
@@ -125,23 +180,45 @@ namespace NVisualSort {
 		}
 
 		inline static thread_local ScopeGuard st_scopeGuard{ []() {
-			Strip::DrawRemainingStrip();
+			if (::GetHWnd()) Strip::FlushRemainingStrip();
 			std::lock_guard lock(Strip::s_threadsMutex);
 			Strip::s_threads.erase(std::this_thread::get_id());
-		}};
+		} };
 
 		Strip& SetTopAuto() noexcept {
-			this->m_top = (GetConfigManager().GetHeight() * (Strip::s_maxValue - this->m_value) + this->m_value * Strip::StripMaxTop()) / Strip::s_maxValue;
-			if (Strip::StripMaxTop() > this->m_top) {
-				this->m_top = Strip::StripMaxTop();
+			auto height = GetConfigManager().GetHeight();
+			if (Strip::s_isAllZero) [[unlikely]] {
+				if (this->m_value == 0) {
+					this->m_top = (1 + StripMaxTopFrac) * height / 2;
+				}
+				else if (this->m_value > 0) {
+					this->m_top = Strip::StripMaxTop();
+				}
+				else {
+					this->m_top = height;
+				}
+				return *this;
 			}
+			int maxTop = static_cast<int>(Strip::StripMaxTop());
+			long long lowestValue = Strip::s_minValue > 0 ? 0 : Strip::s_minValue;
+			int computedTop = static_cast<int>(
+				height - ((static_cast<long long>(this->m_value) - lowestValue) *
+					(height - maxTop) / (Strip::s_maxValue - lowestValue)));
+			if (computedTop < maxTop) computedTop = maxTop;
+			if (height < computedTop) computedTop = height;
+			this->m_top = computedTop;
 			return *this;
 		}
 
-		public:
+	public:
 
 		Strip& SetColorAuto() noexcept {
-			COLORREF tempColor = (StripLastColor - StripFirstColor) / RGB(1, 1, 1) * static_cast<size_t>(this->m_value) / Strip::s_maxValue;
+			if (Strip::s_isAllSame) [[unlikely]] {
+				this->m_color = WHITE;
+				return *this;
+			}
+			COLORREF tempColor = static_cast<COLORREF>((StripLastColor - StripFirstColor) / RGB(1, 1, 1) *
+				(static_cast<long long>(this->m_value) - Strip::s_minValue) / (Strip::s_maxValue - Strip::s_minValue));
 			this->m_color = RGB(tempColor, tempColor, tempColor) + StripFirstColor;
 			return *this;
 		}
@@ -152,7 +229,7 @@ namespace NVisualSort {
 			return *this;
 		}
 
-		private:
+	private:
 
 		static void StopSort() {
 			if (std::this_thread::get_id() != Strip::s_mainThreadId) {
@@ -254,52 +331,63 @@ namespace NVisualSort {
 			for (const auto& strip : strips_) {
 				const int l = (std::max)(0, strip.m_left);
 				const int r = (std::min)(width - 1, strip.m_right);
-				Strip::s_drawFunc(RECT(l, strip.m_top, r, height), strip.m_color);
+				if (l - r != 0) {
+					Strip::s_drawFunc(RECT(l, strip.m_top, r, Strip::s_zeroLineY), strip.m_color);
+				}
 			}
 			GetDrawingTool().FlushBatchDraw(0, top, width, height);
 		}
-		
+
+		static Fraction StripMaxTop() noexcept {
+			return GetConfigManager().GetHeight() * StripMaxTopFrac;
+		}
+
 		static void DrawStrip1(const Strip& strip_, COLORREF color_) {
 			static thread_local auto temp = (Strip::RegisterCurrentThread(), true);
+			if (Strip::s_exitStripSort.load(std::memory_order_acquire)) {
+				return;
+			}
 			GetDrawingTool().ClearRectangle(strip_.m_left, Strip::StripMaxTop(), strip_.m_right, GetConfigManager().GetHeight());
-			Strip::s_drawFunc(RECT(strip_.m_left, strip_.m_top, strip_.m_right, GetConfigManager().GetHeight()), color_);
+			Strip::s_drawFunc(RECT(strip_.m_left, strip_.m_top, strip_.m_right, Strip::s_zeroLineY), color_);
 			GetDrawingTool().FlushBatchDraw(strip_.m_left, Strip::StripMaxTop(), strip_.m_right, GetConfigManager().GetHeight());
 			Strip::s_updateMessageFunc();
-			Strip::DrawRemainingStrip();
+			Strip::FlushRemainingStrip();
 			Strip::s_sleepFunc();
 			Strip::StopSort();
-			Strip::s_drawFunc(RECT(strip_.m_left, strip_.m_top, strip_.m_right, GetConfigManager().GetHeight()), strip_.m_color);
+			Strip::s_drawFunc(RECT(strip_.m_left, strip_.m_top, strip_.m_right, Strip::s_zeroLineY), strip_.m_color);
 			Strip::st_lastOperationNum = 1;
 			Strip::st_lastInterval1 = { strip_.m_left,strip_.m_right };
 		}
 
 		static void DrawStrip2(const Strip& strip1_, COLORREF color1_, const Strip& strip2_, COLORREF color2_) {
 			static thread_local auto temp = (Strip::RegisterCurrentThread(), true);
+			if (Strip::s_exitStripSort.load(std::memory_order_acquire)) {
+				return;
+			}
 			GetDrawingTool().ClearRectangle(strip1_.m_left, Strip::StripMaxTop(), strip1_.m_right, GetConfigManager().GetHeight());
 			GetDrawingTool().ClearRectangle(strip2_.m_left, Strip::StripMaxTop(), strip2_.m_right, GetConfigManager().GetHeight());
-			Strip::s_drawFunc(RECT(strip1_.m_left, strip1_.m_top, strip1_.m_right, GetConfigManager().GetHeight()), color1_);
-			Strip::s_drawFunc(RECT(strip2_.m_left, strip2_.m_top, strip2_.m_right, GetConfigManager().GetHeight()), color2_);
+			Strip::s_drawFunc(RECT(strip1_.m_left, strip1_.m_top, strip1_.m_right, Strip::s_zeroLineY), color1_);
+			Strip::s_drawFunc(RECT(strip2_.m_left, strip2_.m_top, strip2_.m_right, Strip::s_zeroLineY), color2_);
 			GetDrawingTool().FlushBatchDraw(strip1_.m_left, Strip::StripMaxTop(), strip1_.m_right, GetConfigManager().GetHeight());
 			GetDrawingTool().FlushBatchDraw(strip2_.m_left, Strip::StripMaxTop(), strip2_.m_right, GetConfigManager().GetHeight());
 			Strip::s_updateMessageFunc();
-			Strip::DrawRemainingStrip();
+			Strip::FlushRemainingStrip();
 			Strip::s_sleepFunc();
 			Strip::StopSort();
-			Strip::s_drawFunc(RECT(strip1_.m_left,strip1_.m_top,strip1_.m_right,GetConfigManager().GetHeight()), strip1_.m_color);
-			Strip::s_drawFunc(RECT(strip2_.m_left,strip2_.m_top,strip2_.m_right,GetConfigManager().GetHeight()), strip2_.m_color);
+			Strip::s_drawFunc(RECT(strip1_.m_left, strip1_.m_top, strip1_.m_right, Strip::s_zeroLineY), strip1_.m_color);
+			Strip::s_drawFunc(RECT(strip2_.m_left, strip2_.m_top, strip2_.m_right, Strip::s_zeroLineY), strip2_.m_color);
 			Strip::st_lastOperationNum = 2;
 			Strip::st_lastInterval2 = { {strip1_.m_left,strip1_.m_right},{strip2_.m_left,strip2_.m_right} };
 		}
 
 		static void DrawCheckStrip(const Strip& strip_, COLORREF color_) {
-			Strip::s_drawFunc(RECT(strip_.m_left,strip_.m_top,strip_.m_right,GetConfigManager().GetHeight()), color_);
+			if (Strip::s_exitStripSort.load(std::memory_order_acquire)) {
+				return;
+			}
+			Strip::s_drawFunc(RECT(strip_.m_left, strip_.m_top, strip_.m_right, Strip::s_zeroLineY), color_);
 			GetDrawingTool().FlushBatchDraw(RECT(strip_.m_left, Strip::StripMaxTop(), strip_.m_right, GetConfigManager().GetHeight()));
 			Strip::StopSort();
 			Strip::s_sleepFunc();
-		}
-
-		static Fraction StripMaxTop() noexcept {
-			return GetConfigManager().GetHeight() * 2 / 9;
 		}
 
 		static void AddNumCompare1() {

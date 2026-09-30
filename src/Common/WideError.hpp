@@ -22,7 +22,8 @@ namespace NVisualSort {
 		!std::same_as<std::remove_cvref_t<T>, WideError>)
 			explicit WideError(T&& msg)
 			noexcept(std::is_nothrow_constructible_v<std::wstring, T>)
-			: m_wideMessage(std::forward<T>(msg)) {}
+			: m_wideMessage(std::forward<T>(msg)) {
+		}
 
 		WideError(WideError&&) noexcept = default;
 		WideError(const WideError&) = default;

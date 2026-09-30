@@ -78,7 +78,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)src\Common;$(ProjectDir)src\Graphics;$(ProjectDir)src\UI;$(ProjectDir)src\Sort;$(ProjectDir)src\App</AdditionalIncludeDirectories>
-      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/bigobj /utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -98,7 +98,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)src\Common;$(ProjectDir)src\Graphics;$(ProjectDir)src\UI;$(ProjectDir)src\Sort;$(ProjectDir)src\App</AdditionalIncludeDirectories>
-      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/bigobj /utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -116,7 +116,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)src\Common;$(ProjectDir)src\Graphics;$(ProjectDir)src\UI;$(ProjectDir)src\Sort;$(ProjectDir)src\App</AdditionalIncludeDirectories>
-      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/bigobj /utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -136,7 +136,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)src\Common;$(ProjectDir)src\Graphics;$(ProjectDir)src\UI;$(ProjectDir)src\Sort;$(ProjectDir)src\App</AdditionalIncludeDirectories>
-      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/bigobj /utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -147,31 +147,33 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\UI\Button.h" />
-    <ClInclude Include="src\Graphics\ConfigManager.h" />
-    <ClInclude Include="src\Common\Coordinate.h" />
-    <ClInclude Include="src\Sort\Counter.h" />
-    <ClInclude Include="src\UI\Dialog.h" />
-    <ClInclude Include="src\Graphics\DrawingTool.h" />
-    <ClInclude Include="src\Common\Fraction.h" />
-    <ClInclude Include="src\UI\InputBox.h" />
-    <ClInclude Include="src\App\MainMenu.h" />
-    <ClInclude Include="src\Common\ScopeGuard.h" />
-    <ClInclude Include="src\UI\Sketch.h" />
-    <ClInclude Include="src\Sort\Sort.h" />
-    <ClInclude Include="src\Sort\SortHelpers.h" />
-    <ClInclude Include="src\Sort\ExchangeSorts.h" />
-    <ClInclude Include="src\Sort\SelectSorts.h" />
-    <ClInclude Include="src\Sort\InsertSorts.h" />
-    <ClInclude Include="src\Sort\MergeSorts.h" />
-    <ClInclude Include="src\Sort\DistributeSorts.h" />
-    <ClInclude Include="src\Sort\HybridSorts.h" />
-    <ClInclude Include="src\Sort\ConcurrentSorts.h" />
-    <ClInclude Include="src\Sort\MiscSorts.h" />
-    <ClInclude Include="src\Sort\QuickSorts.h" />
-    <ClInclude Include="src\Sort\Strip.h" />
-    <ClInclude Include="src\App\VisualSort.h" />
-    <ClInclude Include="src\Common\WideError.h" />
+    <ClInclude Include="src\App\MouseMessageSource.hpp" />
+    <ClInclude Include="src\Common\Channel.hpp" />
+    <ClInclude Include="src\UI\Button.hpp" />
+    <ClInclude Include="src\Graphics\ConfigManager.hpp" />
+    <ClInclude Include="src\Common\Coordinate.hpp" />
+    <ClInclude Include="src\Sort\Counter.hpp" />
+    <ClInclude Include="src\UI\Dialog.hpp" />
+    <ClInclude Include="src\Graphics\DrawingTool.hpp" />
+    <ClInclude Include="src\Common\Fraction.hpp" />
+    <ClInclude Include="src\UI\InputBox.hpp" />
+    <ClInclude Include="src\App\MainMenu.hpp" />
+    <ClInclude Include="src\Common\ScopeGuard.hpp" />
+    <ClInclude Include="src\UI\Sketch.hpp" />
+    <ClInclude Include="src\Sort\Sort.hpp" />
+    <ClInclude Include="src\Sort\SortHelpers.hpp" />
+    <ClInclude Include="src\Sort\ExchangeSorts.hpp" />
+    <ClInclude Include="src\Sort\SelectSorts.hpp" />
+    <ClInclude Include="src\Sort\InsertSorts.hpp" />
+    <ClInclude Include="src\Sort\MergeSorts.hpp" />
+    <ClInclude Include="src\Sort\DistributeSorts.hpp" />
+    <ClInclude Include="src\Sort\HybridSorts.hpp" />
+    <ClInclude Include="src\Sort\ConcurrentSorts.hpp" />
+    <ClInclude Include="src\Sort\MiscSorts.hpp" />
+    <ClInclude Include="src\Sort\QuickSorts.hpp" />
+    <ClInclude Include="src\Sort\Strip.hpp" />
+    <ClInclude Include="src\App\VisualSort.hpp" />
+    <ClInclude Include="src\Common\WideError.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />

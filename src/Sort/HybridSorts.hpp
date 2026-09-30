@@ -12,7 +12,7 @@
 // TimSort, UnstableGrailSort, WeaveMergeSort, WikiSort, YujisBufferedMergeSort2.
 // ASCII ONLY: comments in English; any Chinese text lives in \uXXXX escapes
 // inside L"..." wide strings.
-#include "SortHelpers.h"
+#include "SortHelpers.hpp"
 #include <algorithm>
 #include <cmath>
 #include <cstddef>

@@ -6,9 +6,9 @@
 #include <utility>
 #include <vector>
 #include <Windows.h>
-#include "Coordinate.h"
-#include "WideError.h"
-#include "ConfigManager.h"
+#include "Coordinate.hpp"
+#include "WideError.hpp"
+#include "ConfigManager.hpp"
 
 namespace NVisualSort {
 
@@ -18,7 +18,7 @@ namespace NVisualSort {
 
 		std::recursive_mutex m_drawMutex;
 
-		// µ¥ÀıÄ£Ê½ÏÂ£¬½ûÖ¹¿½±´ºÍÒÆ¶¯
+		// å•ä¾‹æ¨¡å¼ä¸‹ï¼Œç¦æ­¢æ‹·è´å’Œç§»åŠ¨
 		DrawingTool() noexcept = default;
 		DrawingTool(const DrawingTool&) = delete;
 		DrawingTool& operator=(const DrawingTool&) = delete;
@@ -27,21 +27,21 @@ namespace NVisualSort {
 
 	public:
 
-		// Ö§³Ö·º»¯»æÖÆº¯Êı
-		void ExecuteWithLock(const std::function<void()>& func_) {
-			if (func_) {
-				std::lock_guard<std::recursive_mutex> lock(this->m_drawMutex);
-				func_();
-			}
+		// æ”¯æŒæ³›åŒ–ç»˜åˆ¶å‡½æ•°
+		template <typename F>
+		void ExecuteWithLock(F&& func_) {
+			static_assert(std::is_invocable_v<F&>, "func_å¿…é¡»èƒ½è¢«è°ƒç”¨");
+			std::lock_guard<std::recursive_mutex> lock(this->m_drawMutex);
+			std::forward<F>(func_)();
 		}
 
-		// Çå¿Õ´°¿Ú
+		// æ¸…ç©ºçª—å£
 		void ClearDevice() noexcept {
 			std::lock_guard<std::recursive_mutex> lock(this->m_drawMutex);
 			::cleardevice();
 		}
 
-		// Çå³ı¾ØĞÎÇøÓò
+		// æ¸…é™¤çŸ©å½¢åŒºåŸŸ
 		void ClearRectangle(RECT rect_) noexcept {
 			std::lock_guard<std::recursive_mutex> lock(this->m_drawMutex);
 			::clearrectangle(rect_.left, rect_.top, rect_.right, rect_.bottom);
@@ -52,7 +52,7 @@ namespace NVisualSort {
 			::clearrectangle(left_, top_, right_, bottom_);
 		}
 
-		// »æÖÆÏß
+		// ç»˜åˆ¶çº¿
 		void Line(std::pair<Coordinate, Coordinate> start_end_points_, int line_thick_, int line_style_, COLORREF line_color_) {
 			std::lock_guard<std::recursive_mutex> lock(this->m_drawMutex);
 			::setlinestyle(line_style_, line_thick_);
@@ -60,7 +60,7 @@ namespace NVisualSort {
 			::line(start_end_points_.first.x, start_end_points_.first.y, start_end_points_.second.x, start_end_points_.second.y);
 		}
 
-		// Ìî³ä¾ØĞÎÇøÓò£¨°üº¬±ß¿ò£©
+		// å¡«å……çŸ©å½¢åŒºåŸŸï¼ˆåŒ…å«è¾¹æ¡†ï¼‰
 		void FillRectangle(RECT rect_, int frame_thick_, int frame_style_, COLORREF frame_color_, COLORREF background_color_) {
 			std::lock_guard<std::recursive_mutex> lock(this->m_drawMutex);
 			::setlinestyle(frame_style_, frame_thick_);
@@ -69,10 +69,18 @@ namespace NVisualSort {
 			::fillrectangle(rect_.left, rect_.top, rect_.right, rect_.bottom);
 		}
 
-		// Ìî³ä¶à±ßĞÎ£¨°üº¬±ß¿ò£©
+		void FillRectangle(int left_, int top_, int right_, int bottom_, int frame_thick_, int frame_style_, COLORREF frame_color_, COLORREF background_color_) {
+			std::lock_guard<std::recursive_mutex> lock(this->m_drawMutex);
+			::setlinestyle(frame_style_, frame_thick_);
+			::setlinecolor(frame_color_);
+			::setfillcolor(background_color_);
+			::fillrectangle(left_, top_, right_, bottom_);
+		}
+
+		// å¡«å……å¤šè¾¹å½¢ï¼ˆåŒ…å«è¾¹æ¡†ï¼‰
 		void FillPolygon(const std::vector<Coordinate>& points_, int frame_thick_, int frame_style_, COLORREF frame_color_, COLORREF background_color_) {
 			if (points_.size() < 3) {
-				throw WideError(L"¶à±ßĞÎ¶¥µãÊıÁ¿¹ıÉÙ£¡ÊıÁ¿Îª£º" + std::to_wstring(points_.size()));
+				throw WideError(L"å¤šè¾¹å½¢é¡¶ç‚¹æ•°é‡è¿‡å°‘ï¼æ•°é‡ä¸ºï¼š" + std::to_wstring(points_.size()));
 			}
 			std::lock_guard<std::recursive_mutex> lock(this->m_drawMutex);
 			::setlinestyle(frame_style_, frame_thick_);
@@ -81,7 +89,7 @@ namespace NVisualSort {
 			::fillpolygon(points_.front().AsPointPtr(), static_cast<int>(points_.size()));
 		}
 
-		// Ìî³äÔ²½Ç¾ØĞÎÇøÓò£¨°üº¬±ß¿ò£©
+		// å¡«å……åœ†è§’çŸ©å½¢åŒºåŸŸï¼ˆåŒ…å«è¾¹æ¡†ï¼‰
 		void FillRoundRect(RECT rect_, int ellipse_width_, int ellipse_height_, int frame_thick_, int frame_style_, COLORREF frame_color_, COLORREF background_color_) {
 			std::lock_guard<std::recursive_mutex> lock(this->m_drawMutex);
 			::setlinestyle(frame_style_, frame_thick_);
@@ -96,31 +104,37 @@ namespace NVisualSort {
 			::solidcircle(center_.x, center_.y, radius_);
 		}
 
-		// Ìî³ä¾ØĞÎÇøÓò£¨²»°üº¬±ß¿ò£©
+		// å¡«å……çŸ©å½¢åŒºåŸŸï¼ˆä¸åŒ…å«è¾¹æ¡†ï¼‰
 		void SolidRectangle(RECT rect_, COLORREF background_color_) {
 			std::lock_guard<std::recursive_mutex> lock(this->m_drawMutex);
 			::setfillcolor(background_color_);
 			::solidrectangle(rect_.left, rect_.top, rect_.right, rect_.bottom);
 		}
 
-		// Ìî³ä¶à±ßĞÎ£¨²»°üº¬±ß¿ò£©
+		void SolidRectangle(int left_, int top_, int right_, int bottom_, COLORREF background_color_) {
+			std::lock_guard<std::recursive_mutex> lock(this->m_drawMutex);
+			::setfillcolor(background_color_);
+			::solidrectangle(left_, top_, right_, bottom_);
+		}
+
+		// å¡«å……å¤šè¾¹å½¢ï¼ˆä¸åŒ…å«è¾¹æ¡†ï¼‰
 		void SolidPolygon(const std::vector<Coordinate>& points_, COLORREF background_color_) {
 			if (points_.size() < 3) {
-				throw WideError(L"¶à±ßĞÎ¶¥µãÊıÁ¿¹ıÉÙ£¡ÊıÁ¿Îª£º" + std::to_wstring(points_.size()));
+				throw WideError(L"å¤šè¾¹å½¢é¡¶ç‚¹æ•°é‡è¿‡å°‘ï¼æ•°é‡ä¸ºï¼š" + std::to_wstring(points_.size()));
 			}
 			std::lock_guard<std::recursive_mutex> lock(this->m_drawMutex);
 			::setfillcolor(background_color_);
 			::solidpolygon(points_.front().AsPointPtr(), static_cast<int>(points_.size()));
 		}
 
-		// Ìî³äÔ²½Ç¾ØĞÎÇøÓò£¨²»°üº¬±ß¿ò£©
+		// å¡«å……åœ†è§’çŸ©å½¢åŒºåŸŸï¼ˆä¸åŒ…å«è¾¹æ¡†ï¼‰
 		void SolidRoundRect(RECT rect_, int ellipse_width_, int ellipse_height_, COLORREF background_color_) {
 			std::lock_guard<std::recursive_mutex> lock(this->m_drawMutex);
 			::setfillcolor(background_color_);
 			::solidroundrect(rect_.left, rect_.top, rect_.right, rect_.bottom, ellipse_width_, ellipse_height_);
 		}
 
-		// »æÖÆÔ²½Ç¾ØĞÎ±ß¿ò
+		// ç»˜åˆ¶åœ†è§’çŸ©å½¢è¾¹æ¡†
 		void RoundRect(RECT rect_, int ellipse_width_, int ellipse_height_, int frame_thick_, int frame_style_, COLORREF frame_color_) {
 			std::lock_guard<std::recursive_mutex> lock(this->m_drawMutex);
 			::setlinestyle(frame_style_, frame_thick_);
@@ -128,27 +142,27 @@ namespace NVisualSort {
 			::roundrect(rect_.left, rect_.top, rect_.right, rect_.bottom, ellipse_width_, ellipse_height_);
 		}
 
-		// Ë¢ĞÂÇøÓò
+		// åˆ·æ–°åŒºåŸŸ
 		void FlushBatchDraw() noexcept {
 			std::lock_guard<std::recursive_mutex> lock(this->m_drawMutex);
 			::FlushBatchDraw();
 		}
 
-		// Ë¢ĞÂÇøÓò
+		// åˆ·æ–°åŒºåŸŸ
 		void FlushBatchDraw(int left_, int top_, int right_, int bottom_) noexcept {
 			std::lock_guard<std::recursive_mutex> lock(this->m_drawMutex);
 			::FlushBatchDraw(left_, top_, right_, bottom_);
 		}
 
-		// Ë¢ĞÂÇøÓò
+		// åˆ·æ–°åŒºåŸŸ
 		void FlushBatchDraw(RECT rect_) noexcept {
 			std::lock_guard<std::recursive_mutex> lock(this->m_drawMutex);
 			::FlushBatchDraw(rect_.left, rect_.top, rect_.right, rect_.bottom);
 		}
 
-		// »æÖÆÎÄ±¾
+		// ç»˜åˆ¶æ–‡æœ¬
 		void DrawText_(const std::wstring& text_, RECT rect_, int text_size_, COLORREF text_color_, UINT text_mode_ = DT_CENTER | DT_VCENTER, const std::wstring& font_ = DefaultTypeface) {
-			if(text_.empty()) {
+			if (text_.empty()) {
 				return;
 			}
 			std::lock_guard<std::recursive_mutex> lock(this->m_drawMutex);
@@ -161,7 +175,7 @@ namespace NVisualSort {
 
 	};
 
-	// »ñÈ¡»æÖÆ¹¤¾ßÊµÀı
+	// è·å–ç»˜åˆ¶å·¥å…·å®ä¾‹
 	inline DrawingTool& GetDrawingTool() noexcept {
 		static DrawingTool instance;
 		return instance;

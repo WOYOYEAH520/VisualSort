@@ -7,7 +7,7 @@
 //
 // ASCII ONLY: do not put non-ASCII characters in this file. MSVC parses sources in the
 // system code page (GBK); use \uXXXX escapes if a wide string is ever needed.
-#include "SortHelpers.h"
+#include "SortHelpers.hpp"
 #include <algorithm>
 #include <cstddef>
 #include <utility>

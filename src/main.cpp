@@ -1,8 +1,8 @@
-#include "MainMenu.h"
+#include "MainMenu.hpp"
 #include <Windows.h>
 
 int main() {
-	FreeConsole(); // ¹Ø±Õ¿ØÖÆÌ¨
-	NVisualSort::GetMainMenu(); // µ÷ÓÃ MainMenu µÄ¹¹Ôìº¯Êı
+	FreeConsole(); // å…³é—­æ§åˆ¶å°
+	NVisualSort::GetMainMenu(); // è°ƒç”¨ MainMenu çš„æ„é€ å‡½æ•°
 	return 0;
 }

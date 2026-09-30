@@ -12,7 +12,7 @@
 // Naming: the Java classes InsertionSort and ShellSort already exist as C++ sorts in
 // NSortAlgorithms, so they are ported as InsertionSortJava / ShellSortJava.
 // Every internal helper starts with the PascalCase name of the algorithm it belongs to.
-#include "SortHelpers.h"
+#include "SortHelpers.hpp"
 #include <queue>
 #include <thread>
 

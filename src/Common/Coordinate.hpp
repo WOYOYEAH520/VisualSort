@@ -5,28 +5,28 @@
 
 namespace NVisualSort {
 
-	// ×ø±êÀà£¬±íÊ¾¶şÎ¬×ø±ê
+	// åæ ‡ç±»ï¼Œè¡¨ç¤ºäºŒç»´åæ ‡
 	class Coordinate {
 
 	public:
 
-		using type_x = decltype(POINT::x);
-		using type_y = decltype(POINT::y);
+		using TypeX = decltype(POINT::x);
+		using TypeY = decltype(POINT::y);
 
-		type_x x = 0;
-		type_y y = 0;
+		TypeX x = 0;
+		TypeY y = 0;
 
-		constexpr Coordinate(type_x x_ = 0, type_y y_ = 0) noexcept : x(x_), y(y_) {}
+		constexpr Coordinate(TypeX x_ = 0, TypeY y_ = 0) noexcept : x(x_), y(y_) {}
 		constexpr Coordinate(const Coordinate&) noexcept = default;
 		constexpr Coordinate& operator=(const Coordinate&) noexcept = default;
 		constexpr Coordinate(Coordinate&&) noexcept = default;
 		constexpr Coordinate& operator=(Coordinate&&) noexcept = default;
 
-		constexpr operator std::pair<type_x, type_y>() const noexcept {
+		constexpr operator std::pair<TypeX, TypeY>() const noexcept {
 			return { this->x,this->y };
 		}
 
-		constexpr Coordinate& operator=(const std::pair<type_x, type_y>& pair_) noexcept {
+		constexpr Coordinate& operator=(const std::pair<TypeX, TypeY>& pair_) noexcept {
 			this->x = pair_.first;
 			this->y = pair_.second;
 			return *this;
@@ -61,10 +61,10 @@ namespace NVisualSort {
 	};
 
 	static_assert(sizeof(Coordinate) == sizeof(POINT),
-		"Coordinate µÄ´óĞ¡±ØĞëÓë POINT µÄ´óĞ¡ÏàÍ¬");
+		"Coordinate çš„å¤§å°å¿…é¡»ä¸ POINT çš„å¤§å°ç›¸åŒ");
 	static_assert(offsetof(Coordinate, x) == offsetof(POINT, x),
-		"Coordinate::x Æ«ÒÆÁ¿±ØĞëÓë POINT::x Æ¥Åä");
+		"Coordinate::x åç§»é‡å¿…é¡»ä¸ POINT::x åŒ¹é…");
 	static_assert(offsetof(Coordinate, y) == offsetof(POINT, y),
-		"Coordinate::y Æ«ÒÆÁ¿±ØĞëÓë POINT::y Æ¥Åä");
+		"Coordinate::y åç§»é‡å¿…é¡»ä¸ POINT::y åŒ¹é…");
 
 }

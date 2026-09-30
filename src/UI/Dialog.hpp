@@ -1,18 +1,18 @@
 #pragma once
-#include "Sketch.h"
-#include "Button.h"
+#include "Sketch.hpp"
+#include "Button.hpp"
 #include <optional>
-#include "Fraction.h"
-#include "ConfigManager.h"
-#include "DrawingTool.h"
+#include "Fraction.hpp"
+#include "ConfigManager.hpp"
+#include "DrawingTool.hpp"
 #include <easyx.h>
 #include <Windows.h>
 #include <algorithm>
 #include <string>
 #include <vector>
 #include <functional>
-#include "WideError.h"
-#include "Coordinate.h"
+#include "WideError.hpp"
+#include "Coordinate.hpp"
 #include <concepts>
 #include <type_traits>
 
@@ -22,12 +22,12 @@ namespace NVisualSort {
 
 	private:
 
-		inline static constexpr Fraction MinWidth{ 1,3 }; // ◊Ó–°øÌ∂»Œ™ª≠≤ºøÌ∂»µƒ1/3
-		inline static constexpr Fraction MinHeight{ 1,5 }; // ◊Ó–°∏ﬂ∂»Œ™ª≠≤º∏ﬂ∂»µƒ1/5
-		inline static constexpr Fraction MaxWidth{ 8,9 }; // ◊Ó¥ÛøÌ∂»Œ™ª≠≤ºøÌ∂»µƒ8/9
-		inline static constexpr Fraction MaxHeight{ 8,9 }; // ◊Ó¥Û∏ﬂ∂»Œ™ª≠≤º∏ﬂ∂»µƒ8/9
-		inline static constexpr Fraction Margin{ 1,20 }; // Œƒ±æ…œœ¬«¯”Ú∫Õ±ﬂøÚ…œœ¬«¯”Úµƒ±ﬂæ‡Œ™ª≠≤º∏ﬂ∂»µƒ1/20
-		inline static constexpr Fraction TextSize{ 1,20 }; // Œƒ±æ¥Û–°Œ™ª≠≤º∏ﬂ∂»µƒ1/20
+		inline static constexpr Fraction MinWidth{ 1,3 }; // ÊúÄÂ∞èÂÆΩÂ∫¶‰∏∫ÁîªÂ∏ÉÂÆΩÂ∫¶ÁöÑ1/3
+		inline static constexpr Fraction MinHeight{ 1,5 }; // ÊúÄÂ∞èÈ´òÂ∫¶‰∏∫ÁîªÂ∏ÉÈ´òÂ∫¶ÁöÑ1/5
+		inline static constexpr Fraction MaxWidth{ 8,9 }; // ÊúÄÂ§ßÂÆΩÂ∫¶‰∏∫ÁîªÂ∏ÉÂÆΩÂ∫¶ÁöÑ8/9
+		inline static constexpr Fraction MaxHeight{ 8,9 }; // ÊúÄÂ§ßÈ´òÂ∫¶‰∏∫ÁîªÂ∏ÉÈ´òÂ∫¶ÁöÑ8/9
+		inline static constexpr Fraction Margin{ 1,20 }; // ÊñáÊú¨‰∏ä‰∏ãÂå∫ÂüüÂíåËæπÊ°Ü‰∏ä‰∏ãÂå∫ÂüüÁöÑËæπË∑ù‰∏∫ÁîªÂ∏ÉÈ´òÂ∫¶ÁöÑ1/20
+		inline static constexpr Fraction TextSize{ 1,20 }; // ÊñáÊú¨Â§ßÂ∞è‰∏∫ÁîªÂ∏ÉÈ´òÂ∫¶ÁöÑ1/20
 
 		Sketch m_mainBox;
 		ButtonSequence m_buttons;
@@ -70,9 +70,9 @@ namespace NVisualSort {
 					F(1, 2) - F(this->m_mainBox.GetHeight()) / GetConfigManager().GetHeight() / 2,
 					F(1, 2) + F(textWidth) / GetConfigManager().GetWidth() / 2,
 					F(1, 2) + F(this->m_mainBox.GetHeight()) / GetConfigManager().GetHeight() / 2
-				); //  π”√Œƒ±æøÌ∂»≤¢ÀÆ∆Ωæ”÷–
+				); // ‰ΩøÁî®ÊñáÊú¨ÂÆΩÂ∫¶Âπ∂Ê∞¥Âπ≥Â±Ö‰∏≠
 				this->m_mainBox.SetFrameRect(mainRect);
-			});
+				});
 		}
 
 		void SetHeightAuto() {
@@ -80,7 +80,7 @@ namespace NVisualSort {
 				::settextstyle(Dialog::GetTextSize(), 0, this->m_mainBox.GetTypeface().c_str());
 				RECT tempRect = this->m_mainBox.GetFrameRect();
 				int textHeight = ::drawtext(this->m_mainBox.GetText().c_str(), &tempRect, DT_CALCRECT | DT_WORDBREAK);
-				textHeight = textHeight + Dialog::GetMargin() * 2; // ÃÌº”±ﬂæ‡
+				textHeight = textHeight + Dialog::GetMargin() * 2; // Ê∑ªÂä†ËæπË∑ù
 				textHeight = std::clamp(textHeight, static_cast<int>(Dialog::GetMinHeight()), static_cast<int>(Dialog::GetMaxHeight()));
 				using F = Fraction;
 				RECT mainRect = ComputeRect(
@@ -89,9 +89,9 @@ namespace NVisualSort {
 					F(1, 2) - F(textHeight) / GetConfigManager().GetHeight() / 2,
 					F(1, 2) + F(this->m_mainBox.GetWidth()) / GetConfigManager().GetWidth() / 2,
 					F(1, 2) + F(textHeight) / GetConfigManager().GetHeight() / 2
-				); //  π”√Œƒ±æ∏ﬂ∂»≤¢¥π÷±æ”÷–
+				); // ‰ΩøÁî®ÊñáÊú¨È´òÂ∫¶Âπ∂ÂûÇÁõ¥Â±Ö‰∏≠
 				this->m_mainBox.SetFrameRect(mainRect);
-			});
+				});
 		}
 
 	public:
@@ -100,12 +100,12 @@ namespace NVisualSort {
 			requires (std::constructible_from<std::wstring, T> &&
 		!std::same_as<std::remove_cvref_t<T>, WideError>)
 			explicit Dialog(T&& msg)
-			noexcept(std::is_nothrow_constructible_v<std::wstring, T>):m_buttons(1) {
+			noexcept(std::is_nothrow_constructible_v<std::wstring, T>) :m_buttons(1) {
 			this->SetText({ msg });
 			this->SetCrossAuto();
 		}
 
-		Dialog(const std::vector<std::wstring>& messages_ = {}):m_buttons(1) {
+		Dialog(const std::vector<std::wstring>& messages_ = {}) :m_buttons(1) {
 			this->SetText(messages_);
 			this->SetCrossAuto();
 		}
@@ -178,8 +178,8 @@ namespace NVisualSort {
 		}
 
 		void RunNonBlockDialog() {
-			this->m_mainBox.DrawSketch(false); // œ»ªÊ÷∆∂‘ª∞øÚ
-			this->m_buttons.RunNonBlockButtonLoop(); // —≠ª∑ ¬º˛◊‘∂ØªÊ÷∆∞¥≈•
+			this->m_mainBox.DrawSketch(false); // ÂÖàÁªòÂà∂ÂØπËØùÊ°Ü
+			this->m_buttons.RunNonBlockButtonLoop(); // Âæ™ÁéØ‰∫ã‰ª∂Ëá™Âä®ÁªòÂà∂ÊåâÈíÆ
 		}
 
 	};

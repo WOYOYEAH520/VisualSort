@@ -3,12 +3,12 @@
 #include <functional>
 #include <Windows.h>
 #include <easyx.h>
-#include "ConfigManager.h"
-#include "DrawingTool.h"
+#include "ConfigManager.hpp"
+#include "DrawingTool.hpp"
 #include <algorithm>
 #include <utility>
-#include "WideError.h"
-#include "Coordinate.h"
+#include "WideError.hpp"
+#include "Coordinate.hpp"
 #include <cmath>
 
 namespace NVisualSort {
@@ -17,36 +17,36 @@ namespace NVisualSort {
 
 	private:
 
-		// ¸½¼Ó»æÖÆº¯Êı£¬Sketch&²ÎÊıÎª×ÔÉí£¨²»Òª²¶»ñ×ÔÉíSketchÖ¸Õë£¬±ÜÃâÒÆ¶¯ºóµÄĞü¿ÕÖ¸Õë·çÏÕ£¡£©
+		// é™„åŠ ç»˜åˆ¶å‡½æ•°ï¼ŒSketch&å‚æ•°ä¸ºè‡ªèº«ï¼ˆä¸è¦æ•è·è‡ªèº«SketchæŒ‡é’ˆï¼Œé¿å…ç§»åŠ¨åçš„æ‚¬ç©ºæŒ‡é’ˆé£é™©ï¼ï¼‰
 		std::function<void(Sketch&)> m_additionalDrawFunction;
-		std::wstring m_text;                                          // ÎÄ±¾ÄÚÈİ
-		std::wstring m_typeface = DefaultTypeface;                    // ÎÄ±¾×ÖÌå
-		RECT m_frameRect = {};                                        // ±ß¿ò¾ØĞÎÇøÓò
-		RECT m_textRect = {};                                         // ÎÄ±¾¾ØĞÎÇøÓò
-		int m_frameThick = 2;                                         // ±ß¿òÏß´ÖÏ¸
-		int m_frameStyle = PS_SOLID;                                  // ±ß¿òÏßÑùÊ½£¨Ä¬ÈÏÎªÊµÏß£©
-		COLORREF m_frameColor = WHITE;                                // ±ß¿òÑÕÉ«£¨Ä¬ÈÏÎª°×É«£©
-		int m_frameRoundSize = 10;                                    // ±ß¿òÔ²½Ç´óĞ¡
-		COLORREF m_backgroundColor = DefaultCanvasColor;              // ±³¾°ÑÕÉ«£¨Ä¬ÈÏÎªÄ¬ÈÏ»­²¼ÑÕÉ«£©
-		int m_textSize = 0;                                           // ÎÄ±¾´óĞ¡
-		COLORREF m_textColor = WHITE;                                 // ÎÄ±¾ÑÕÉ«
-		UINT m_textMode = DT_SINGLELINE | DT_VCENTER | DT_CENTER;     // ÎÄ±¾»æÖÆ¸ñÊ½£¨Ä¬ÈÏÎª½ûÖ¹»»ĞĞ¡¢Ë®Æ½¾ÓÖĞÓëÊúÖ±¾ÓÖĞ£©
-		bool m_hasFrame = true;                                       // ÊÇ·ñ´æÔÚ±ß¿ò
-		bool m_hasBackground = true;                                  // ÊÇ·ñ´æÔÚ±³¾°
+		std::wstring m_text;                                          // æ–‡æœ¬å†…å®¹
+		std::wstring m_typeface = DefaultTypeface;                    // æ–‡æœ¬å­—ä½“
+		RECT m_frameRect = {};                                        // è¾¹æ¡†çŸ©å½¢åŒºåŸŸ
+		RECT m_textRect = {};                                         // æ–‡æœ¬çŸ©å½¢åŒºåŸŸ
+		int m_frameThick = 2;                                         // è¾¹æ¡†çº¿ç²—ç»†
+		int m_frameStyle = PS_SOLID;                                  // è¾¹æ¡†çº¿æ ·å¼ï¼ˆé»˜è®¤ä¸ºå®çº¿ï¼‰
+		COLORREF m_frameColor = WHITE;                                // è¾¹æ¡†é¢œè‰²ï¼ˆé»˜è®¤ä¸ºç™½è‰²ï¼‰
+		int m_frameRoundSize = 10;                                    // è¾¹æ¡†åœ†è§’å¤§å°
+		COLORREF m_backgroundColor = DefaultCanvasColor;              // èƒŒæ™¯é¢œè‰²ï¼ˆé»˜è®¤ä¸ºé»˜è®¤ç”»å¸ƒé¢œè‰²ï¼‰
+		int m_textSize = 0;                                           // æ–‡æœ¬å¤§å°
+		COLORREF m_textColor = WHITE;                                 // æ–‡æœ¬é¢œè‰²
+		UINT m_textMode = DT_SINGLELINE | DT_VCENTER | DT_CENTER;     // æ–‡æœ¬ç»˜åˆ¶æ ¼å¼ï¼ˆé»˜è®¤ä¸ºç¦æ­¢æ¢è¡Œã€æ°´å¹³å±…ä¸­ä¸ç«–ç›´å±…ä¸­ï¼‰
+		bool m_hasFrame = true;                                       // æ˜¯å¦å­˜åœ¨è¾¹æ¡†
+		bool m_hasBackground = true;                                  // æ˜¯å¦å­˜åœ¨èƒŒæ™¯
 
-		// ¹æ·¶»¯×ø±ê£¬È·±£×ó<ÓÒ£¬ÉÏ<ÏÂ
+		// è§„èŒƒåŒ–åæ ‡ï¼Œç¡®ä¿å·¦<å³ï¼Œä¸Š<ä¸‹
 		constexpr void NormalizeCoordinates() noexcept {
 			if (this->m_frameRect.left > this->m_frameRect.right) std::swap(this->m_frameRect.left, this->m_frameRect.right);
 			if (this->m_frameRect.top > this->m_frameRect.bottom) std::swap(this->m_frameRect.top, this->m_frameRect.bottom);
 		}
 
-		// ×Ô¶¯ÉèÖÃÎÄ±¾ÇøÓò£¨ÎÄ±¾ÇøÓòÂÔĞ¡ÓÚ±ß¿òÇøÓò£©
+		// è‡ªåŠ¨è®¾ç½®æ–‡æœ¬åŒºåŸŸï¼ˆæ–‡æœ¬åŒºåŸŸç•¥å°äºè¾¹æ¡†åŒºåŸŸï¼‰
 		void SetTextRectAuto() {
 			this->NormalizeCoordinates();
 
 			int width = this->m_frameRect.right - this->m_frameRect.left;
 			int height = this->m_frameRect.bottom - this->m_frameRect.top;
-			int margin = (std::min)(width, height) / 20; // Ê¹ÓÃÏà¶Ô±ß¾à
+			int margin = (std::min)(width, height) / 20; // ä½¿ç”¨ç›¸å¯¹è¾¹è·
 
 			this->m_textRect = {
 				this->m_frameRect.left + margin,
@@ -58,19 +58,19 @@ namespace NVisualSort {
 			this->SetTextSizeAuto();
 		}
 
-		// ×Ô¶¯ÉèÖÃºÏÊÊÎÄ±¾´óĞ¡
+		// è‡ªåŠ¨è®¾ç½®åˆé€‚æ–‡æœ¬å¤§å°
 		void SetTextSizeAuto() {
 
 			int textWidth = this->m_textRect.right - this->m_textRect.left;
 			int textHeight = this->m_textRect.bottom - this->m_textRect.top;
 
 			if (!this->m_text.empty() && (textWidth <= 0 || textHeight <= 0)) {
-				throw WideError(L"Sketch µÄÎÄ±¾¾ØĞÎÇøÓòÎŞĞ§£¡ÎÄ±¾ÄÚÈİÎª£º" + (this->m_text.empty() ? L"<¿Õ>" : this->m_text));
+				throw WideError(L"Sketch çš„æ–‡æœ¬çŸ©å½¢åŒºåŸŸæ— æ•ˆï¼æ–‡æœ¬å†…å®¹ä¸ºï¼š" + (this->m_text.empty() ? L"<ç©º>" : this->m_text));
 			}
 
 			GetDrawingTool().ExecuteWithLock([this, textWidth, textHeight]() {
 
-				// Ê¹ÓÃ¶ş·Ö²éÕÒÈ·¶¨×î¼Ñ×ÖÌå´óĞ¡
+				// ä½¿ç”¨äºŒåˆ†æŸ¥æ‰¾ç¡®å®šæœ€ä½³å­—ä½“å¤§å°
 				int lowSize = 1;
 				int highSize = textHeight;
 				int bestSize = 1;
@@ -79,7 +79,7 @@ namespace NVisualSort {
 					int middleSize = (lowSize + highSize) / 2;
 					::settextstyle(middleSize, 0, this->m_typeface.c_str());
 					int currentWidth = ::textwidth(this->m_text.c_str());
-					int currentHeight = ::textheight(L"Hg"); // Ê¹ÓÃ°üº¬ÉÏÏÂÑÓÉìµÄ×Ö·û
+					int currentHeight = ::textheight(L"Hg"); // ä½¿ç”¨åŒ…å«ä¸Šä¸‹å»¶ä¼¸çš„å­—ç¬¦
 
 					if (currentWidth <= textWidth && currentHeight <= textHeight) {
 						bestSize = middleSize;
@@ -90,7 +90,7 @@ namespace NVisualSort {
 					}
 				}
 				this->m_textSize = bestSize;
-			});
+				});
 
 		}
 
@@ -111,14 +111,16 @@ namespace NVisualSort {
 			this->SetTextRectAuto();
 		}
 
-		Sketch& SetSketch(int left_, int top_, int right_, int bottom_, const std::wstring& text_ = L"") {
+		virtual ~Sketch() = default;
+
+		Sketch& SetAttribute(int left_, int top_, int right_, int bottom_, const std::wstring& text_ = L"") {
 			this->m_frameRect = { left_,top_,right_,bottom_ };
 			this->m_text = text_;
 			this->SetTextRectAuto();
 			return *this;
 		}
 
-		Sketch& SetSketch(RECT frame_rect_, const std::wstring& text_ = L"") {
+		Sketch& SetAttribute(RECT frame_rect_, const std::wstring& text_ = L"") {
 			this->m_frameRect = frame_rect_;
 			this->m_text = text_;
 			this->SetTextRectAuto();
@@ -233,7 +235,7 @@ namespace NVisualSort {
 
 		Sketch& SetTextRectWithoutResize(RECT text_rect_) noexcept {
 			this->m_textRect = text_rect_;
-			// È·±£ÎÄ±¾¾ØĞÎÔÚ±ß¿ò¾ØĞÎÄÚ
+			// ç¡®ä¿æ–‡æœ¬çŸ©å½¢åœ¨è¾¹æ¡†çŸ©å½¢å†…
 			this->m_textRect.left = (std::max)(this->m_textRect.left, this->m_frameRect.left);
 			this->m_textRect.top = (std::max)(this->m_textRect.top, this->m_frameRect.top);
 			this->m_textRect.right = (std::min)(this->m_textRect.right, this->m_frameRect.right);
@@ -329,8 +331,8 @@ namespace NVisualSort {
 		}
 		Coordinate GetCenterXY() const {
 			return {
-				static_cast<Coordinate::type_x>(std::round(static_cast<double>(this->GetLeft() + this->GetRight()) / 2)),
-				static_cast<Coordinate::type_y>(std::round(static_cast<double>(this->GetTop() + this->GetBottom()) / 2))
+				static_cast<decltype(Coordinate::x)>(std::round(static_cast<double>(this->GetLeft() + this->GetRight()) / 2)),
+				static_cast<decltype(Coordinate::y)>(std::round(static_cast<double>(this->GetTop() + this->GetBottom()) / 2))
 			};
 		}
 
@@ -339,7 +341,7 @@ namespace NVisualSort {
 		}
 
 		void DrawSketch(bool is_flush_ = true) {
-			// »æÖÆ±³¾°
+			// ç»˜åˆ¶èƒŒæ™¯
 			if (this->m_hasBackground) {
 				if (this->m_hasFrame) {
 					GetDrawingTool().FillRoundRect(
@@ -362,7 +364,7 @@ namespace NVisualSort {
 				);
 			}
 
-			// »æÖÆÎÄ±¾
+			// ç»˜åˆ¶æ–‡æœ¬
 			if (!this->m_text.empty()) {
 				GetDrawingTool().DrawText_(
 					this->m_text, this->m_textRect, this->m_textSize,
@@ -370,12 +372,12 @@ namespace NVisualSort {
 				);
 			}
 
-			// Ö´ĞĞ¶îÍâµÄ»æÖÆº¯Êı
+			// æ‰§è¡Œé¢å¤–çš„ç»˜åˆ¶å‡½æ•°
 			if (this->m_additionalDrawFunction) {
 				this->m_additionalDrawFunction(*this);
 			}
 
-			// Èç¹ûĞèÒªË¢ĞÂ
+			// å¦‚æœéœ€è¦åˆ·æ–°
 			if (is_flush_) {
 				this->Flush();
 			}

@@ -25,7 +25,7 @@
 // CountingSort range checks. The int phase always runs first (VisualSort::RunIntSort) and
 // aborts the whole run, so the Counter/Strip phases can never see values that would make
 // those tables out of bounds.
-#include "SortHelpers.h"
+#include "SortHelpers.hpp"
 #include <atomic>
 #include <chrono>
 #include <cmath>

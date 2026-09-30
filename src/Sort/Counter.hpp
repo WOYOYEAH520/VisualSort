@@ -5,7 +5,7 @@
 
 namespace NVisualSort {
 
-	inline std::atomic<size_t> ActualStepNum{0};
+	inline std::atomic<size_t> ActualStepNum{ 0 };
 
 	class Counter {
 
@@ -186,7 +186,7 @@ namespace NVisualSort {
 			return *this;
 		}
 
-		// µÝÔöµÝ¼õÔËËã·û
+		// é€’å¢žé€’å‡è¿ç®—ç¬¦
 		Counter& operator++() {
 			IncrementIfNeeded();
 			++m_value;
@@ -209,7 +209,7 @@ namespace NVisualSort {
 			return m_value--;
 		}
 
-		// ËãÊõÔËËã·û
+		// ç®—æœ¯è¿ç®—ç¬¦
 		int operator+(int value_) const {
 			IncrementIfNeeded();
 			return m_value + value_;
@@ -260,7 +260,7 @@ namespace NVisualSort {
 			return m_value % counter_.m_value;
 		}
 
-		// ÓÑÔªº¯ÊýÉùÃ÷
+		// å‹å…ƒå‡½æ•°å£°æ˜Ž
 		friend bool operator>(int, const Counter&);
 		friend bool operator<(int, const Counter&);
 		friend bool operator==(int, const Counter&);

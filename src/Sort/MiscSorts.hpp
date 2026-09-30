@@ -9,7 +9,7 @@
 //
 // This header is #included from Sort.h after SortHelpers.h, and it is also
 // compiled standalone by the check TU, so it pulls in what it needs itself.
-#include "SortHelpers.h"
+#include "SortHelpers.hpp"
 
 #include <cstddef>
 #include <limits>
